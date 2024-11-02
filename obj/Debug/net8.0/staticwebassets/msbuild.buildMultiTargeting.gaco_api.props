@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\gaco_api.props" />
+</Project>
