@@ -7945,19 +7945,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\": {}
+    "C:\\Users\\arbal\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
+      "projectUniqueName": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
       "projectName": "gaco_api",
-      "projectPath": "c:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
-      "packagesPath": "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\",
-      "outputPath": "c:\\ProyectoLuis\\GacoApi\\obj\\",
+      "projectPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
+      "packagesPath": "C:\\Users\\arbal\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\LuisOctavioDelRincón\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\arbal\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

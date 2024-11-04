@@ -64,17 +64,28 @@ namespace gaco_api.Controllers
                 {
                     isError = false,
                     MsgError = "Login exitoso.",
+                    //Object = new
+                    //{
+                    //    TokenModel = new
+                    //    {
+                    //        accessToken = _utilidades.GenerarJWT(usuarioDTO),
+                    //        tokenType = "Bearer",
+                    //        expiresIn = DateTime.UtcNow.AddHours(1).ToUniversalTime(),
+                    //        issuedAt = DateTime.UtcNow,
+                    //        // refreshToken = _utilidades.GenerateRefreshToken(),
+                    //    },
+                    //    Usuario = usuarioDTO
+                    //}
                     Object = new
                     {
-                        TokenModel = new
-                        {
-                            accessToken = _utilidades.GenerarJWT(usuarioDTO),
-                            tokenType = "Bearer",
-                            expiresIn = DateTime.UtcNow.AddHours(1).ToUniversalTime(),
-                            issuedAt = DateTime.UtcNow,
-                            // refreshToken = _utilidades.GenerateRefreshToken(),
-                        },
-                        Usuario = usuarioDTO
+                        Username = string.IsNullOrEmpty(usuarioDTO.NombreCompleto) ? "Anonymous" : usuarioDTO.NombreCompleto,
+                        Correo = usuarioDTO.Correo,
+                        Rol = usuarioDTO.TipoUsuario,
+                        jwtToken = _utilidades.GenerarJWT(usuarioDTO),
+                        IdEmpresa = "",
+                        NombreEmpresa = "",
+
+                        Rol2 = ""
                     }
                 });
             }
