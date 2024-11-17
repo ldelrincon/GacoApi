@@ -19,6 +19,7 @@ namespace gaco_api.Controllers
 
         // GET: api/Productoes
         [HttpGet]
+        [Route("Lista")]
         public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
         {
             return await _context.Productos.ToListAsync();

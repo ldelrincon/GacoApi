@@ -33,6 +33,22 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.AuthController",
+    "Method": "LoginAcceso",
+    "RelativePath": "api/Auth/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loginDTO",
+        "Type": "gaco_api.Models.DTOs.Requests.LoginRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/loginA",
     "HttpMethod": "POST",
@@ -43,6 +59,22 @@
         "Name": "loginDTO",
         "Type": "gaco_api.Models.DTOs.Requests.LoginRequest",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.AuthController",
+    "Method": "ValidarToken",
+    "RelativePath": "api/Auth/ValidarToken",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -257,26 +289,6 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.ProductosController",
-    "Method": "GetProductos",
-    "RelativePath": "api/Productos",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[gaco_api.Models.Producto, gaco_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "gaco_api.Controllers.ProductosController",
     "Method": "PostProducto",
     "RelativePath": "api/Productos",
     "HttpMethod": "POST",
@@ -363,6 +375,26 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.ProductosController",
+    "Method": "GetProductos",
+    "RelativePath": "api/Productos/Lista",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[gaco_api.Models.Producto, gaco_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "gaco_api.Controllers.ReporteServiciosController",

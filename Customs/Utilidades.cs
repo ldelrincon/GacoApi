@@ -63,5 +63,40 @@ namespace gaco_api.Customs
             return Convert.ToBase64String(randomNumber);
         }
 
+        public bool ValidarToken(string token)
+        {
+            var claimsPrincipal = new ClaimsPrincipal();
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!))
+            };
+
+            try
+            {
+                claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                return true;
+            }
+            catch (SecurityTokenExpiredException stee)
+            {
+                Console.WriteLine(stee.Message);
+                return false;
+            }
+            catch (SecurityTokenInvalidSignatureException stise)
+            {
+                Console.WriteLine(stise.Message);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
     }
 }
