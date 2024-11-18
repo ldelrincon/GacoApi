@@ -8,6 +8,8 @@ using gaco_api.Customs;
 using gaco_api.Models;
 using gaco_api.Models.DTOs.Requests;
 using gaco_api.Models.DTOs.Responses;
+using gaco_api.Models.DTOs.Requests.Usuarios;
+using gaco_api.Models.DTOs.Responses.Usuarios;
 
 namespace gaco_api.Controllers
 {
@@ -108,12 +110,12 @@ namespace gaco_api.Controllers
                     .Select(m => new UsuarioResponse
                     {
                         Id = m.Id,
-                        TipoUsuario = m.IdCatTipoUsuario,
+                        IdTipoUsuario = m.IdCatTipoUsuario,
                         NombreCompleto = $"{m.Nombres} {m.Apellidos}",
                         Correo = m.Correo,
                         CorreoConfirmado = m.CorreoConfirmado,
                         FechaCreacion = m.FechaCreacion,
-                        Estatus = m.IdCatEstatus,
+                        IdEstatus = m.IdCatEstatus,
                     }).FirstOrDefaultAsync();
 
                 if (usuarioDTO == null)
