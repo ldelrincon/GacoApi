@@ -1,10 +1,10 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using gaco_api.Models;
-using gaco_api.Models.DTOs.Responses;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using gaco_api.Models.DTOs.Responses.Usuarios;
 
 namespace gaco_api.Customs
 {

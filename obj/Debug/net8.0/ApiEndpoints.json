@@ -25,7 +25,7 @@
     "Parameters": [
       {
         "Name": "usuarioDTO",
-        "Type": "gaco_api.Models.DTOs.Requests.UsuarioRequest",
+        "Type": "gaco_api.Models.DTOs.Requests.Usuarios.UsuarioRequest",
         "IsRequired": true
       }
     ],
@@ -718,6 +718,22 @@
       {
         "Name": "id",
         "Type": "System.Int64",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.UsuariosController",
+    "Method": "BusquedaUsuario",
+    "RelativePath": "api/Usuarios/Busqueda",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "gaco_api.Models.DTOs.Requests.Usuarios.BusquedaUsuarioRequest",
         "IsRequired": true
       }
     ],

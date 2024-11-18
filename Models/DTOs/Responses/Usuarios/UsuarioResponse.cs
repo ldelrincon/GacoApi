@@ -1,10 +1,11 @@
-﻿namespace gaco_api.Models.DTOs.Responses
+﻿namespace gaco_api.Models.DTOs.Responses.Usuarios
 {
     public class UsuarioResponse
     {
         public long Id { get; set; }
 
-        public int TipoUsuario { get; set; }
+        public int IdTipoUsuario { get; set; }
+        public string TipoUsuario { get; set; }
 
         public string Usuario { get; set; } = null!;
 
@@ -18,6 +19,7 @@
 
         public DateTime FechaCreacion { get; set; }
 
-        public int Estatus { get; set; }
+        public int IdEstatus { get; set; }
+        public string Estatus { get; set; }
     }
 }

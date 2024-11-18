@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace gaco_api.Models.DTOs.Requests
+namespace gaco_api.Models.DTOs.Requests.Usuarios
 {
     public class UsuarioRequest
     {
