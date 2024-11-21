@@ -19,6 +19,8 @@ public partial class Producto
 
     public int IdCatEstatus { get; set; }
 
+    public string Codigo { get; set; } = null!;
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual CatGrupoProducto IdCatGrupoProductoNavigation { get; set; } = null!;
