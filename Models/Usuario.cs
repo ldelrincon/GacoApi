@@ -31,9 +31,15 @@ public partial class Usuario
 
     public virtual CatTipoUsuario IdCatTipoUsuarioNavigation { get; set; } = null!;
 
+    public virtual ICollection<LogUsuario> LogUsuarios { get; set; } = new List<LogUsuario>();
+
     public virtual ICollection<RelSeguimentoProducto> RelSeguimentoProductos { get; set; } = new List<RelSeguimentoProducto>();
 
-    public virtual ICollection<ReporteServicio> ReporteServicios { get; set; } = new List<ReporteServicio>();
+    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioCreacionNavigations { get; set; } = new List<ReporteServicio>();
+
+    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioEncargadoNavigations { get; set; } = new List<ReporteServicio>();
+
+    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioTecnicoNavigations { get; set; } = new List<ReporteServicio>();
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
 }

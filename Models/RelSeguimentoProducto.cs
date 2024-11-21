@@ -19,6 +19,14 @@ public partial class RelSeguimentoProducto
 
     public int IdCatEstatus { get; set; }
 
+    public decimal Cantidad { get; set; }
+
+    public string Unidad { get; set; } = null!;
+
+    public decimal? MontoGasto { get; set; }
+
+    public decimal? MontoVenta { get; set; }
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual Producto IdProductoNavigation { get; set; } = null!;

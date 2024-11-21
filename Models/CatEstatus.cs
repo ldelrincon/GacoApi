@@ -17,7 +17,13 @@ public partial class CatEstatus
 
     public bool Activo { get; set; }
 
+    public virtual ICollection<CatEntidadesFederativa> CatEntidadesFederativas { get; set; } = new List<CatEntidadesFederativa>();
+
     public virtual ICollection<CatGrupoProducto> CatGrupoProductos { get; set; } = new List<CatGrupoProducto>();
+
+    public virtual ICollection<CatMunicipio> CatMunicipios { get; set; } = new List<CatMunicipio>();
+
+    public virtual ICollection<CatRegimenFiscale> CatRegimenFiscales { get; set; } = new List<CatRegimenFiscale>();
 
     public virtual ICollection<CatTipoSolicitude> CatTipoSolicitudes { get; set; } = new List<CatTipoSolicitude>();
 

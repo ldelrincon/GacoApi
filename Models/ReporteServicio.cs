@@ -23,6 +23,20 @@ public partial class ReporteServicio
 
     public int IdCatEstatus { get; set; }
 
+    public DateTime? FechaInicio { get; set; }
+
+    public string Accesorios { get; set; } = null!;
+
+    public bool ServicioPreventivo { get; set; }
+
+    public bool ServicioCorrectivo { get; set; }
+
+    public string ObservacionesRecomendaciones { get; set; } = null!;
+
+    public long IdUsuarioEncargado { get; set; }
+
+    public long IdUsuarioTecnico { get; set; }
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual CatTipoSolicitude IdCatSolicitudNavigation { get; set; } = null!;
@@ -30,6 +44,10 @@ public partial class ReporteServicio
     public virtual Cliente IdClienteNavigation { get; set; } = null!;
 
     public virtual Usuario IdUsuarioCreacionNavigation { get; set; } = null!;
+
+    public virtual Usuario IdUsuarioEncargadoNavigation { get; set; } = null!;
+
+    public virtual Usuario IdUsuarioTecnicoNavigation { get; set; } = null!;
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
 }
