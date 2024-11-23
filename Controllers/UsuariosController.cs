@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using gaco_api.Models.DTOs.Responses.Usuarios;
 using gaco_api.Models.DTOs.Requests.Usuarios;
 using System.Linq;
+using gaco_api.Customs;
 
 namespace gaco_api.Controllers
 {
@@ -16,10 +17,12 @@ namespace gaco_api.Controllers
     public class UsuariosController : ControllerBase
     {
         private readonly GacoDbContext _context;
+        private readonly Utilidades _utilidades;
 
-        public UsuariosController(GacoDbContext context)
+        public UsuariosController(GacoDbContext context, Utilidades utilidades)
         {
             _context = context;
+            _utilidades = utilidades;
         }
 
         [HttpPost]
@@ -67,88 +70,114 @@ namespace gaco_api.Controllers
             return Ok(response);
         }
 
-        // GET: api/Usuarios
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        [HttpPost]
+        [Route("Nuevo")]
+        public async Task<IActionResult> NuevoUsuario(UsuarioRequest request)
         {
-            return await _context.Usuarios.ToListAsync();
-        }
-
-        // GET: api/Usuarios/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(long id)
-        {
-            var usuario = await _context.Usuarios.FindAsync(id);
-
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-
-            return usuario;
-        }
-
-        // PUT: api/Usuarios/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(long id, Usuario usuario)
-        {
-            if (id != usuario.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(usuario).State = EntityState.Modified;
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Validar si existe el tipo de usuario.
+                var existeTipoUsuario = await _context.CatTipoUsuarios.AnyAsync(m => m.Id == request.TipoUsuario);
+                if (!existeTipoUsuario)
+                {
+                    return Ok(new DefaultResponse<object> { Message = "Tipo de usuario no encontrado." });
+                }
+
+                // Validar si ya existe el correo que se quiere registrar.
+                var existeCorreo = await _context.Usuarios.AnyAsync(m => m.Correo == request.Correo);
+                if (existeCorreo)
+                {
+                    return Ok(new DefaultResponse<object> { Message = "El correo ingresado ya está registrado." });
+                }
+
+                if(request.Contrasena != request.ConfirmarContrasena)
+                {
+                    return Ok(new DefaultResponse<object> { Message = "Contraseña no concuerdan." });
+                }
+
+                var usuarioModel = new Usuario()
+                {
+                    IdCatTipoUsuario = request.TipoUsuario,
+                    Correo = request.Correo,
+                    Contrasena = _utilidades.EncriptarSHA256(request.Contrasena),
+                    Nombres = request.Nombre,
+                    Apellidos = request.Apellidos,
+                    Telefono = request.Telefono,
+                    IdCatEstatus = 1
+                };
+
+                await _context.Usuarios.AddAsync(usuarioModel);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UsuarioExists(id))
+
+                if (usuarioModel.Id != 0)
                 {
-                    return NotFound();
+                    return Ok(new DefaultResponse<object>
+                    {
+                        Success = true,
+                        Message = "Usuario registrado correctamente."
+                    });
                 }
-                else
+                return BadRequest(new DefaultResponse<object>
                 {
-                    throw;
-                }
+                    Success = false,
+                    Message = "Error al registrar el usuario."
+                });
+
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Usuarios
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
-        {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
-        }
-
-        // DELETE: api/Usuarios/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUsuario(long id)
-        {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
             }
-
-            _context.Usuarios.Remove(usuario);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool UsuarioExists(long id)
+        [HttpGet]
+        [Route("PorId/{id}")]
+        public async Task<IActionResult> UsuarioPorId(long id)
         {
-            return _context.Usuarios.Any(e => e.Id == id);
+            var response = new DefaultResponse<EditarUsuarioResponse>();
+
+            // Seleccionar y aplicar paginación
+            var usuario = await _context.Usuarios
+                .Where(u => u.Id == id)
+                .Select(ur => new EditarUsuarioResponse
+                {
+                    Id = ur.Id,
+                    IdCatTipoUsuario = ur.IdCatTipoUsuario,
+                    Apellidos = ur.Apellidos,
+                    Correo = ur.Correo,
+                    Nombres = ur.Nombres,
+                    IdCatEstatus = ur.IdCatEstatus,
+                    Telefono = ur.Telefono,
+                    FechaCreacion = ur.FechaCreacion,
+                    FechaModificacion = ur.FechaModificacion,
+                    CorreoConfirmado = ur.CorreoConfirmado,
+                    Contrasena = string.Empty
+                }).FirstOrDefaultAsync();
+
+            if(usuario != null)
+            {
+                response = new DefaultResponse<EditarUsuarioResponse>
+                {
+                    Success = true,
+                    Data = usuario,
+                };
+            }
+            else
+            {
+                response = new DefaultResponse<EditarUsuarioResponse>
+                {
+                    Success = false,
+                    Message = "No se encontro el usuario."
+                };
+            }
+
+            return Ok(response);
         }
     }
 }
