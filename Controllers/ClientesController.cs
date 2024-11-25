@@ -1,4 +1,6 @@
-﻿using gaco_api.Models;
+﻿using gaco_api.Customs;
+using gaco_api.Models;
+using gaco_api.Models.DTOs.Requests.Clientes;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Clientes;
 using Microsoft.AspNetCore.Authorization;
@@ -21,17 +23,25 @@ namespace gaco_api.Controllers
 
         // GET: api/Clientes
         [HttpGet]
+        [Route("ListaClientes")]
         public async Task<ActionResult> GetClientes()
         {
             var clientes = await _context.Clientes
                 .Select(c => new ClienteResponse {
                     Id = c.Id,
-                    Telefono = c.Telefono,
-                    Rfc = c.Rfc,
+                    Codigo = c.Codigo,
+                    CodigoPostal = c.CodigoPostal,
+                    Correo = c.Correo,
                     Direccion = c.Direccion,
                     FechaCreacion = c.FechaCreacion,
-                    FechaModificacion = c.FechaModificacion,
+                    FechaModificacion= c.FechaModificacion,
                     IdCatEstatus = c.IdCatEstatus,
+                    IdCatMunicipio = c.IdCatMunicipio,
+                    IdRegimenFiscal = c.IdRegimenFiscal,
+                    Nombre = c.Nombre,
+                    RazonSocial = c.RazonSocial,
+                    Rfc = c.Rfc,
+                    Telefono = c.Telefono
                 }).ToListAsync();
 
             var response = new DefaultResponse<List<ClienteResponse>>
@@ -41,7 +51,25 @@ namespace gaco_api.Controllers
             };
 
             return Ok(response);
-            //return await _context.Clientes.ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("ListaCatalogoClientes")]
+        public async Task<ActionResult> ListaCatalogoClientes()
+        {
+            var response = await _context.Clientes
+                .Select(c => new ClienteCatalogoResponse
+                {
+                    Id = c.Id,
+                    Codigo = c.Codigo,
+                    Nombre = c.Nombre,
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<ClienteCatalogoResponse>>
+            {
+                Success = true,
+                Data = response,
+            });
         }
 
         // GET: api/Clientes/5
@@ -58,67 +86,68 @@ namespace gaco_api.Controllers
             return cliente;
         }
 
-        // PUT: api/Clientes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(long id, Cliente cliente)
+        [HttpPost]
+        [Route("Nuevo")]
+        public async Task<ActionResult> NuevoCliente(NuevoClienteRequest request)
         {
-            if (id != cliente.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(cliente).State = EntityState.Modified;
-
             try
             {
+                //if (!ModelState.IsValid)
+                //{
+                //    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                //}
+
+                // Validar si ya existe el correo que se quiere registrar.
+                var existeCorreo = await _context.Clientes.AnyAsync(m => m.Correo == request.Correo);
+                if (existeCorreo)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El correo ingresado ya está registrado." });
+                }
+
+                var existeRFC = await _context.Clientes.AnyAsync(m => m.Rfc == request.Rfc);
+                if (existeRFC)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El RFC ingresado ya está registrado." });
+                }
+
+                var nuevoCliente = new Cliente()
+                {
+                    Telefono = request.Telefono,
+                    Rfc = request.Rfc,
+                    Direccion = request.Direccion,
+                    IdCatEstatus = 1,
+                    Nombre = request.Nombre,
+                    Codigo = request.Codigo,
+                    IdCatMunicipio = request.IdCatMunicipio,
+                    CodigoPostal = request.CodigoPostal,
+                    RazonSocial = request.RazonSocial,
+                    IdRegimenFiscal = request.IdRegimenFiscal,
+                    Correo = request.Correo
+                };
+
+                await _context.Clientes.AddAsync(nuevoCliente);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClienteExists(id))
+
+                if (nuevoCliente.Id != 0)
                 {
-                    return NotFound();
+                    return Ok(new DefaultResponse<object>
+                    {
+                        Success = true,
+                        Message = "registrado correctamente."
+                    });
                 }
-                else
+                return BadRequest(new DefaultResponse<object>
                 {
-                    throw;
-                }
+                    Success = false,
+                    Message = "Error al registrarlo."
+                });
+
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Clientes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
-        {
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCliente", new { id = cliente.Id }, cliente);
-        }
-
-        // DELETE: api/Clientes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCliente(long id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
             }
-
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ClienteExists(long id)
-        {
-            return _context.Clientes.Any(e => e.Id == id);
         }
     }
 }

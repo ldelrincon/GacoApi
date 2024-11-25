@@ -2,24 +2,29 @@
 {
     public class UsuarioResponse
     {
-        public long Id { get; set; }
+    public long Id { get; set; }
 
-        public int IdTipoUsuario { get; set; }
-        public string TipoUsuario { get; set; }
-
-        public string Usuario { get; set; } = null!;
+        public int IdCatTipoUsuario { get; set; }
 
         public string Correo { get; set; } = null!;
 
+        public string Contrasena { get; set; } = null!;
+
         public bool CorreoConfirmado { get; set; }
 
-        public string NombreCompleto { get; set; } = null!;
+        public string Nombres { get; set; } = null!;
 
-        public bool Tfa { get; set; }
+        public string Apellidos { get; set; } = null!;
+
+        public string Telefono { get; set; } = null!;
 
         public DateTime FechaCreacion { get; set; }
 
-        public int IdEstatus { get; set; }
+        public DateTime? FechaModificacion { get; set; }
+
+        public int IdCatEstatus { get; set; }
+
         public string Estatus { get; set; }
+        public string TipoUsuario { get; set; }
     }
 }

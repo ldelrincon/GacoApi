@@ -46,14 +46,17 @@ namespace gaco_api.Controllers
                 .Select(ur => new UsuarioResponse
                 {
                     Id = ur.Id,
-                    IdTipoUsuario = ur.IdCatTipoUsuario,
-                    TipoUsuario = ur.IdCatTipoUsuarioNavigation.TipoUsuario,
-                    Usuario = ur.Nombres,
-                    Correo = ur.Correo,
                     CorreoConfirmado = ur.CorreoConfirmado,
-                    NombreCompleto = ur.Nombres + " " + ur.Apellidos,
+                    Correo = ur.Correo,
                     FechaCreacion = ur.FechaCreacion,
-                    IdEstatus = ur.IdCatEstatus,
+                    IdCatTipoUsuario = ur.IdCatTipoUsuario,
+                    Nombres = ur.Nombres,
+                    Apellidos = ur.Apellidos,
+                    Contrasena = string.Empty,
+                    FechaModificacion = ur.FechaModificacion,
+                    IdCatEstatus = ur.IdCatEstatus,
+                    Telefono = ur.Telefono,
+                    TipoUsuario = ur.IdCatTipoUsuarioNavigation.TipoUsuario,
                     Estatus = ur.IdCatEstatusNavigation.Estatus,
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
@@ -178,6 +181,36 @@ namespace gaco_api.Controllers
             }
 
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("PorIdTipo/{id}")]
+        public async Task<IActionResult> UsuariosPorIdTipo(int id)
+        {
+            var response = await _context.Usuarios
+            .Where(u => u.IdCatTipoUsuario == id)
+               .Select(u => new UsuarioResponse
+               {
+                   Id = u.Id,
+                   Estatus = string.Empty,
+                   CorreoConfirmado = u.CorreoConfirmado,
+                   Correo = u.Correo,
+                   FechaCreacion = u.FechaCreacion,
+                   IdCatTipoUsuario = u.IdCatTipoUsuario,
+                   Nombres = u.Nombres,
+                   Apellidos = u.Apellidos,
+                   Contrasena = string.Empty,
+                   FechaModificacion = u.FechaModificacion,
+                   IdCatEstatus = u.IdCatEstatus,
+                   Telefono = u.Telefono
+
+               }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<UsuarioResponse>>
+            {
+                Success = true,
+                Data = response,
+            });
         }
     }
 }

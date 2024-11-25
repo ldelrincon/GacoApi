@@ -36,7 +36,7 @@ namespace gaco_api.Customs
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Correo!),
-                new Claim(ClaimTypes.Name, usuario.NombreCompleto!), // Opcional: nombre del usuario
+                new Claim(ClaimTypes.Name, $"{usuario.Nombres} {usuario.Apellidos}"!), // Opcional: nombre del usuario
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
