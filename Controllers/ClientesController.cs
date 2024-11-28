@@ -1,6 +1,9 @@
-﻿using gaco_api.Models;
+﻿using gaco_api.Customs;
+using gaco_api.Models;
+using gaco_api.Models.DTOs.Requests.Clientes;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Clientes;
+using gaco_api.Models.DTOs.Responses.Usuarios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,21 +22,53 @@ namespace gaco_api.Controllers
             _context = context;
         }
 
-        // GET: api/Clientes
-        [HttpGet]
-        public async Task<ActionResult> GetClientes()
+        [HttpPost]
+        [Route("Busqueda")]
+        public async Task<IActionResult> BusquedaCliente(BusquedaClienteRequest request)
         {
-            var clientes = await _context.Clientes
-                .Select(c => new ClienteResponse {
-                    Id = c.Id,
-                    Telefono = c.Telefono,
-                    Rfc = c.Rfc,
-                    Direccion = c.Direccion,
-                    FechaCreacion = c.FechaCreacion,
-                    FechaModificacion = c.FechaModificacion,
-                    IdCatEstatus = c.IdCatEstatus,
-                }).ToListAsync();
+            // Construir la consulta inicial
+            var query = _context.Clientes
+                .Include(u => u.IdCatMunicipioNavigation)
+                .Include(u => u.IdRegimenFiscalNavigation)
+                .Include(u => u.IdCatEstatusNavigation)
+                .AsQueryable();
 
+            // Filtrar si hay una búsqueda
+            if (!string.IsNullOrEmpty(request.Busqueda))
+            {
+                query = query.Where(u => u.Nombre.Contains(request.Busqueda)
+                    || u.RazonSocial.Contains(request.Busqueda)
+                    || u.Rfc.Contains(request.Busqueda)
+                    || u.Telefono.Contains(request.Busqueda)
+                    || u.Correo.Contains(request.Busqueda)
+                );
+            }
+
+            // Seleccionar y aplicar paginación
+            var clientes = await query
+                .Select(x => new ClienteResponse
+                {
+                    Id = x.Id,
+                    Codigo = x.Codigo,
+                    CodigoPostal = x.CodigoPostal,
+                    Correo = x.Correo,
+                    Direccion = x.Direccion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    IdCatMunicipio = x.IdCatMunicipio,
+                    IdRegimenFiscal = x.IdRegimenFiscal,
+                    Nombre = x.Nombre,
+                    RazonSocial = x.RazonSocial,
+                    Rfc = x.Rfc,
+                    Telefono = x.Telefono, 
+                    Estatus = x.IdCatEstatusNavigation.Estatus
+                })
+                .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+                .Take(request.CantidadPorPagina)
+                .ToListAsync();
+
+            // Crear la respuesta
             var response = new DefaultResponse<List<ClienteResponse>>
             {
                 Success = true,
@@ -41,84 +76,201 @@ namespace gaco_api.Controllers
             };
 
             return Ok(response);
-            //return await _context.Clientes.ToListAsync();
         }
 
-        // GET: api/Clientes/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cliente>> GetCliente(long id)
+        [HttpGet]
+        [Route("ListaCatalogoClientes")]
+        public async Task<ActionResult> ListaCatalogoClientes()
         {
-            var cliente = await _context.Clientes.FindAsync(id);
+            var response = await _context.Clientes
+                .Select(c => new ClienteCatalogoResponse
+                {
+                    Id = c.Id,
+                    Codigo = c.Codigo,
+                    Nombre = c.Nombre,
+                }).ToListAsync();
 
-            if (cliente == null)
+            return Ok(new DefaultResponse<List<ClienteCatalogoResponse>>
             {
-                return NotFound();
-            }
-
-            return cliente;
+                Success = true,
+                Data = response,
+            });
         }
 
-        // PUT: api/Clientes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(long id, Cliente cliente)
+        [HttpGet]
+        [Route("PorId/{id}")]
+        public async Task<IActionResult> ClientePorId(long id)
         {
-            if (id != cliente.Id)
+            var response = new DefaultResponse<EditarClienteResponse>();
+
+            // Seleccionar y aplicar paginación
+            var cliente = await _context.Clientes
+                .Include(x => x.IdCatMunicipioNavigation)
+                .Where(x => x.Id == id)
+                .Select(x => new EditarClienteResponse
+                {
+                    Id = x.Id,
+                    Codigo = x.Codigo,
+                    CodigoPostal = x.CodigoPostal,
+                    Correo = x.Correo,
+                    FechaModificacion = x.FechaModificacion,
+                    Direccion = x.Direccion,
+                    FechaCreacion = x.FechaCreacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    IdCatMunicipio = x.IdCatMunicipio,
+                    IdRegimenFiscal = x.IdRegimenFiscal,
+                    Nombre = x.Nombre,
+                    RazonSocial = x.RazonSocial,
+                    Rfc = x.Rfc,
+                    Telefono = x.Telefono,
+                    EfeKey = x.IdCatMunicipioNavigation.EfeKey
+                }).FirstOrDefaultAsync();
+
+            if (cliente != null)
             {
-                return BadRequest();
+                response = new DefaultResponse<EditarClienteResponse>
+                {
+                    Success = true,
+                    Data = cliente,
+                };
+            }
+            else
+            {
+                response = new DefaultResponse<EditarClienteResponse>
+                {
+                    Success = false,
+                    Message = "No se encontro el cliente."
+                };
             }
 
-            _context.Entry(cliente).State = EntityState.Modified;
+            return Ok(response);
+        }
 
+        [HttpPost]
+        [Route("Nuevo")]
+        public async Task<ActionResult> NuevoCliente(NuevoClienteRequest request)
+        {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Validar si ya existe el correo que se quiere registrar.
+                var existeCorreo = await _context.Clientes.AnyAsync(m => m.Correo == request.Correo);
+                if (existeCorreo)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El correo ingresado ya está registrado." });
+                }
+
+                var existeRFC = await _context.Clientes.AnyAsync(m => m.Rfc == request.Rfc);
+                if (existeRFC)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El RFC ingresado ya está registrado." });
+                }
+
+                var nuevoCliente = new Cliente()
+                {
+                    Telefono = request.Telefono,
+                    Rfc = request.Rfc,
+                    Direccion = request.Direccion,
+                    IdCatEstatus = 1,
+                    Nombre = request.Nombre,
+                    Codigo = request.Codigo,
+                    IdCatMunicipio = request.IdCatMunicipio,
+                    CodigoPostal = request.CodigoPostal,
+                    RazonSocial = request.RazonSocial,
+                    IdRegimenFiscal = request.IdRegimenFiscal,
+                    Correo = request.Correo
+                };
+
+                await _context.Clientes.AddAsync(nuevoCliente);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClienteExists(id))
+
+                if (nuevoCliente.Id != 0)
                 {
-                    return NotFound();
+                    return Ok(new DefaultResponse<object>
+                    {
+                        Success = true,
+                        Message = "registrado correctamente."
+                    });
                 }
-                else
+                return BadRequest(new DefaultResponse<object>
                 {
-                    throw;
-                }
+                    Success = false,
+                    Message = "Error al registrarlo."
+                });
+
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Clientes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
-        {
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetCliente", new { id = cliente.Id }, cliente);
-        }
-
-        // DELETE: api/Clientes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCliente(long id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
             }
-
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool ClienteExists(long id)
+        [HttpPut]
+        [Route("Actualizar")]
+        public async Task<ActionResult> ActualizarCliente(ActualizarClienteRequest request)
         {
-            return _context.Clientes.Any(e => e.Id == id);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Buscar al cliente existente por su ID
+                var cliente = await _context.Clientes.FindAsync(request.Id);
+                if (cliente == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Message = "Cliente no encontrado." });
+                }
+
+                // Validar si el correo ya está registrado por otro cliente
+                var existeCorreo = await _context.Clientes.AnyAsync(m => m.Correo == request.Correo && m.Id != request.Id);
+                if (existeCorreo)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El correo ingresado ya está registrado por otro cliente." });
+                }
+
+                // Validar si el RFC ya está registrado por otro cliente
+                var existeRFC = await _context.Clientes.AnyAsync(m => m.Rfc == request.Rfc && m.Id != request.Id);
+                if (existeRFC)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El RFC ingresado ya está registrado por otro cliente." });
+                }
+
+                // Actualizar los datos del cliente
+                cliente.Telefono = request.Telefono;
+                cliente.Rfc = request.Rfc;
+                cliente.Direccion = request.Direccion;
+                cliente.IdCatEstatus = request.IdCatEstatus;
+                cliente.Nombre = request.Nombre;
+                cliente.Codigo = request.Codigo;
+                cliente.IdCatMunicipio = request.IdCatMunicipio;
+                cliente.CodigoPostal = request.CodigoPostal;
+                cliente.RazonSocial = request.RazonSocial;
+                cliente.IdRegimenFiscal = request.IdRegimenFiscal;
+                cliente.Correo = request.Correo;
+
+                // Guardar los cambios
+                _context.Clientes.Update(cliente);
+                await _context.SaveChangesAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Cliente actualizado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
         }
+
     }
 }

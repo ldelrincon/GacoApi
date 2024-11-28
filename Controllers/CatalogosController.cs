@@ -1,11 +1,9 @@
-﻿using gaco_api.Models.DTOs.Requests.Usuarios;
-using gaco_api.Models.DTOs.Responses.Usuarios;
+﻿using gaco_api.Models;
 using gaco_api.Models.DTOs.Responses;
+using gaco_api.Models.DTOs.Responses.Catalogos;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using gaco_api.Models;
 
 namespace gaco_api.Controllers
 {
@@ -45,6 +43,94 @@ namespace gaco_api.Controllers
             };
 
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("ListaCatRegimenFiscales")]
+        public async Task<IActionResult> ListaCatRegimenFiscales()
+        {
+            var response = await _context.CatRegimenFiscales
+                .Select(x => new CatRegimenFiscalResponse
+                {
+                    Id = x.Id,
+                    Clave = x.Clave,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<CatRegimenFiscalResponse>>
+            {
+                Success = true,
+                Data = response
+            });
+        }
+
+        [HttpGet]
+        [Route("ListaCatTipoSolicitudes")]
+        public async Task<IActionResult> ListaCatTipoSolicitudes()
+        {
+            var response = await _context.CatTipoSolicitudes
+                .Select(x => new CatTipoSolicitudResponse
+                {
+                    Id = x.Id,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    TipoSolicitud = x.TipoSolicitud,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<CatTipoSolicitudResponse>>
+            {
+                Success = true,
+                Data = response
+            });
+        }
+
+        [HttpGet]
+        [Route("ListaCatEntidadesFederativas")]
+        public async Task<IActionResult> ListaCatEntidadesFederativas()
+        {
+            var response = await _context.CatEntidadesFederativas
+                .Select(x => new CatEntidadesFederativaResponse
+                {
+                    Id = x.Id,
+                    Abreviatura = x.Abreviatura,
+                    CatalogKey = x.CatalogKey,
+                    EntidadFederativa = x.EntidadFederativa,
+                    IdCatEstatus = x.IdCatEstatus
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<CatEntidadesFederativaResponse>>
+            {
+                Success = true,
+                Data = response
+            });
+        }
+
+        [HttpGet]
+        [Route("ListaCatMunicipioPorEfeKey/{efeKey}")]
+        public async Task<IActionResult> ListaCatMunicipioPorEfeKey(string efeKey)
+        {
+            var response = await _context.CatMunicipios
+                .Where(x => x.EfeKey == efeKey)
+                .Select(x => new CatMunicipioResponse
+                {
+                    Id = x.Id,
+                    CatalogKey = x.CatalogKey,
+                    EfeKey = x.EfeKey,
+                    Estatus = x.Estatus,
+                    Municipio = x.Municipio,
+                    IdCatEstatus = x.IdCatEstatus
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<CatMunicipioResponse>>
+            {
+                Success = true,
+                Data = response
+            });
         }
     }
 }

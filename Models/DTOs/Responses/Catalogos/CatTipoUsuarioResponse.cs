@@ -1,4 +1,4 @@
-﻿namespace gaco_api.Models.DTOs.Responses
+﻿namespace gaco_api.Models.DTOs.Responses.Catalogos
 {
     public class CatTipoUsuarioResponse
     {

@@ -42,12 +42,13 @@ namespace gaco_api.Controllers
                     .Select(m => new UsuarioResponse
                     {
                         Id = m.Id,
-                        IdTipoUsuario = m.IdCatTipoUsuario,
-                        NombreCompleto = $"{m.Nombres} {m.Apellidos}",
+                        IdCatTipoUsuario = m.IdCatTipoUsuario,
+                        Nombres = m.Nombres,
+                        Apellidos = m.Apellidos,
                         Correo = m.Correo,
                         CorreoConfirmado = m.CorreoConfirmado,
                         FechaCreacion = m.FechaCreacion,
-                        IdEstatus = m.IdCatEstatus,
+                        IdCatEstatus = m.IdCatEstatus,
                     }).FirstOrDefaultAsync();
 
                 if (usuarioDTO == null)
@@ -78,7 +79,7 @@ namespace gaco_api.Controllers
                     //}
                     Object = new
                     {
-                        Username = string.IsNullOrEmpty(usuarioDTO.NombreCompleto) ? "Anonymous" : usuarioDTO.NombreCompleto,
+                        Username = string.IsNullOrEmpty($"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}") ? "Anonymous" : $"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}",
                         Correo = usuarioDTO.Correo,
                         Rol = usuarioDTO.TipoUsuario,
                         jwtToken = _utilidades.GenerarJWT(usuarioDTO),
@@ -115,12 +116,13 @@ namespace gaco_api.Controllers
                     .Select(m => new UsuarioResponse
                     {
                         Id = m.Id,
-                        IdTipoUsuario = m.IdCatTipoUsuario,
-                        NombreCompleto = $"{m.Nombres} {m.Apellidos}",
+                        IdCatTipoUsuario = m.IdCatTipoUsuario,
+                        Nombres = m.Nombres,
+                        Apellidos = m.Apellidos,
                         Correo = m.Correo,
                         CorreoConfirmado = m.CorreoConfirmado,
                         FechaCreacion = m.FechaCreacion,
-                        IdEstatus = m.IdCatEstatus,
+                        IdCatEstatus = m.IdCatEstatus,
                     }).FirstOrDefaultAsync();
 
                 if (usuarioDTO == null)
@@ -139,7 +141,7 @@ namespace gaco_api.Controllers
                     Message = "Login exitoso.",
                     Data = new
                     {
-                        Username = string.IsNullOrEmpty(usuarioDTO.NombreCompleto) ? "Anonymous" : usuarioDTO.NombreCompleto,
+                        Username = string.IsNullOrEmpty($"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}") ? "Anonymous" : $"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}",
                         Correo = usuarioDTO.Correo,
                         Rol = usuarioDTO.TipoUsuario,
                         Token = _utilidades.GenerarJWT(usuarioDTO),

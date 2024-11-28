@@ -1,6 +1,6 @@
 ﻿namespace gaco_api.Models.DTOs.Responses.Clientes
 {
-    public class ClienteResponse
+    public class EditarClienteResponse
     {
         public long Id { get; set; }
 
@@ -29,7 +29,6 @@
         public int IdRegimenFiscal { get; set; }
 
         public string Correo { get; set; } = null!;
-        public string Estatus { get; set; }
-
+        public string? EfeKey { get; set; }
     }
 }
