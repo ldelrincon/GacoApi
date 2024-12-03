@@ -65,18 +65,6 @@ namespace gaco_api.Controllers
                 {
                     isError = false,
                     MsgError = "Login exitoso.",
-                    //Object = new
-                    //{
-                    //    TokenModel = new
-                    //    {
-                    //        accessToken = _utilidades.GenerarJWT(usuarioDTO),
-                    //        tokenType = "Bearer",
-                    //        expiresIn = DateTime.UtcNow.AddHours(1).ToUniversalTime(),
-                    //        issuedAt = DateTime.UtcNow,
-                    //        // refreshToken = _utilidades.GenerateRefreshToken(),
-                    //    },
-                    //    Usuario = usuarioDTO
-                    //}
                     Object = new
                     {
                         Username = string.IsNullOrEmpty($"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}") ? "Anonymous" : $"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}",
