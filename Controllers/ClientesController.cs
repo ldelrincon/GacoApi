@@ -1,9 +1,7 @@
-﻿using gaco_api.Customs;
-using gaco_api.Models;
+﻿using gaco_api.Models;
 using gaco_api.Models.DTOs.Requests.Clientes;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Clientes;
-using gaco_api.Models.DTOs.Responses.Usuarios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
