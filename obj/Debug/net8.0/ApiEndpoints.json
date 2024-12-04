@@ -91,6 +91,16 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.CatalogosController",
+    "Method": "ListaCatGrupoProductos",
+    "RelativePath": "api/Catalogos/ListaCatGrupoProductos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.CatalogosController",
     "Method": "ListaCatMunicipioPorEfeKey",
     "RelativePath": "api/Catalogos/ListaCatMunicipioPorEfeKey/{efeKey}",
     "HttpMethod": "GET",
@@ -139,7 +149,7 @@
     "ContainingType": "gaco_api.Controllers.ClientesController",
     "Method": "ActualizarCliente",
     "RelativePath": "api/Clientes/Actualizar",
-    "HttpMethod": "PUT",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -320,6 +330,22 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.ProductosController",
+    "Method": "ActualizarProducto",
+    "RelativePath": "api/Productos/Actualizar",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "gaco_api.Models.DTOs.Requests.Productos.ActualizarProductoRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.ProductosController",
     "Method": "BusquedaProducto",
     "RelativePath": "api/Productos/Busqueda",
     "HttpMethod": "POST",
@@ -329,6 +355,22 @@
       {
         "Name": "request",
         "Type": "gaco_api.Models.DTOs.Requests.Productos.BusquedaProductoRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.ProductosController",
+    "Method": "NuevoProducto",
+    "RelativePath": "api/Productos/Nuevo",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "gaco_api.Models.DTOs.Requests.Productos.NuevoProductoRequest",
         "IsRequired": true
       }
     ],
