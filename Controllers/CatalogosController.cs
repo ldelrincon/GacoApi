@@ -132,5 +132,27 @@ namespace gaco_api.Controllers
                 Data = response
             });
         }
+
+        [HttpGet]
+        [Route("ListaCatGrupoProductos")]
+        public async Task<IActionResult> ListaCatGrupoProductos()
+        {
+            var response = await _context.CatGrupoProductos
+                .Select(x => new CatGrupoProductosResponse
+                {
+                    Id = x.Id,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaModificacion = x.FechaModificacion,
+                    Grupo = x.Grupo,
+                    IdCatEstatus = x.IdCatEstatus
+                }).ToListAsync();
+
+            return Ok(new DefaultResponse<List<CatGrupoProductosResponse>>
+            {
+                Success = true,
+                Data = response
+            });
+        }
     }
 }

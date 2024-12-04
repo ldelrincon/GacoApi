@@ -208,7 +208,7 @@ namespace gaco_api.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("Actualizar")]
         public async Task<ActionResult> ActualizarCliente(ActualizarClienteRequest request)
         {

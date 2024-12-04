@@ -2,7 +2,7 @@
 {
     public class ActualizarClienteRequest
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Telefono { get; set; }
         public string Rfc { get; set; }
         public string Direccion { get; set; }
