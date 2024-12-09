@@ -38,7 +38,13 @@ namespace gaco_api.Controllers
                 query = query.Where(u => u.Codigo.Contains(request.Busqueda)
                     || u.Producto1.Contains(request.Busqueda)
                     || u.IdCatGrupoProductoNavigation.Grupo.Contains(request.Busqueda)
+                    && u.IdCatEstatus == 1
                 );
+            }
+
+            if(request.CantidadPorPagina == -1)
+            {
+                request.CantidadPorPagina = await _context.Productos.CountAsync(x => x.IdCatEstatus == 1);
             }
 
             // Seleccionar y aplicar paginación
@@ -199,7 +205,7 @@ namespace gaco_api.Controllers
                     return Conflict(new DefaultResponse<object> { Message = "El grupo de productos no exite o no se encontro." });
                 }
 
-                var existeProducto = await _context.Productos.AnyAsync(m => m.Producto1 == request.Producto);
+                var existeProducto = await _context.Productos.AnyAsync(m => m.Producto1 == request.Producto && m.Id != request.Id);
                 if (existeProducto)
                 {
                     return Conflict(new DefaultResponse<object> { Message = "El producto ya está registrado." });
