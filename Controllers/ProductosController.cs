@@ -38,7 +38,13 @@ namespace gaco_api.Controllers
                 query = query.Where(u => u.Codigo.Contains(request.Busqueda)
                     || u.Producto1.Contains(request.Busqueda)
                     || u.IdCatGrupoProductoNavigation.Grupo.Contains(request.Busqueda)
+                    && u.IdCatEstatus == 1
                 );
+            }
+
+            if(request.CantidadPorPagina == -1)
+            {
+                request.CantidadPorPagina = await _context.Productos.CountAsync(x => x.IdCatEstatus == 1);
             }
 
             // Seleccionar y aplicar paginación
@@ -111,89 +117,128 @@ namespace gaco_api.Controllers
             return Ok(response);
         }
 
-        //// GET: api/Productoes
-        //[HttpGet]
-        //[Route("Lista")]
-        //public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
-        //{
-        //    return await _context.Productos.ToListAsync();
-        //}
+        [HttpPost]
+        [Route("Nuevo")]
+        public async Task<ActionResult> NuevoProducto(NuevoProductoRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
 
-        //// GET: api/Productoes/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Producto>> GetProducto(long id)
-        //{
-        //    var producto = await _context.Productos.FindAsync(id);
+                var existeGrupoProducto = await _context.CatGrupoProductos.AnyAsync(m => m.Id == request.IdCatGrupoProducto);
+                if (!existeGrupoProducto)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El grupo de productos no exite o no se encontro." });
+                }
 
-        //    if (producto == null)
-        //    {
-        //        return NotFound();
-        //    }
+                var existeProducto = await _context.Productos.AnyAsync(m => m.Producto1 == request.Producto);
+                if (existeProducto)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El producto ya está registrado." });
+                }
 
-        //    return producto;
-        //}
+                var existeCodigo = await _context.Productos.AnyAsync(m => m.Codigo == request.Codigo);
+                if (existeCodigo)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El codigo ya está registrado." });
+                }
 
-        //// PUT: api/Productoes/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutProducto(long id, Producto producto)
-        //{
-        //    if (id != producto.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+                var nuevoProducto = new Producto()
+                {
+                    IdCatGrupoProducto = request.IdCatGrupoProducto,
+                    Producto1 = request.Producto,
+                    Codigo = request.Codigo,
+                    Descripcion = request.Descripcion,
+                    IdCatEstatus = 1,
+                    
+                };
 
-        //    _context.Entry(producto).State = EntityState.Modified;
+                await _context.Productos.AddAsync(nuevoProducto);
+                await _context.SaveChangesAsync();
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!ProductoExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+                if (nuevoProducto.Id != 0)
+                {
+                    return Ok(new DefaultResponse<object>
+                    {
+                        Success = true,
+                        Message = "registrado correctamente."
+                    });
+                }
+                return BadRequest(new DefaultResponse<object>
+                {
+                    Success = false,
+                    Message = "Error al registrarlo."
+                });
 
-        //    return NoContent();
-        //}
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
 
-        //// POST: api/Productoes
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Producto>> PostProducto(Producto producto)
-        //{
-        //    _context.Productos.Add(producto);
-        //    await _context.SaveChangesAsync();
+        [HttpPost]
+        [Route("Actualizar")]
+        public async Task<ActionResult> ActualizarProducto(ActualizarProductoRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
 
-        //    return CreatedAtAction("GetProducto", new { id = producto.Id }, producto);
-        //}
+                // Buscar al cliente existente por su ID
+                var producto = await _context.Productos.FindAsync(request.Id);
+                if (producto == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Message = "Producto no encontrado." });
+                }
 
-        //// DELETE: api/Productoes/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProducto(long id)
-        //{
-        //    var producto = await _context.Productos.FindAsync(id);
-        //    if (producto == null)
-        //    {
-        //        return NotFound();
-        //    }
+                var existeGrupoProducto = await _context.CatGrupoProductos.AnyAsync(m => m.Id == request.IdCatGrupoProducto);
+                if (!existeGrupoProducto)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El grupo de productos no exite o no se encontro." });
+                }
 
-        //    _context.Productos.Remove(producto);
-        //    await _context.SaveChangesAsync();
+                var existeProducto = await _context.Productos.AnyAsync(m => m.Producto1 == request.Producto && m.Id != request.Id);
+                if (existeProducto)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El producto ya está registrado." });
+                }
 
-        //    return NoContent();
-        //}
+                var existeCodigo = await _context.Productos.AnyAsync(m => m.Codigo == request.Codigo && m.Id != request.Id);
+                if (existeCodigo)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El codigo ya está registrado." });
+                }
 
-        //private bool ProductoExists(long id)
-        //{
-        //    return _context.Productos.Any(e => e.Id == id);
-        //}
+                // Actualizar los datos del produto
+                producto.IdCatGrupoProducto = request.IdCatGrupoProducto;
+                producto.Codigo = request.Codigo;
+                producto.Producto1 = request.Producto;
+                producto.Descripcion = producto.Descripcion;
+                producto.FechaModificacion = DateTime.Now;
+
+                // Guardar los cambios
+                _context.Productos.Update(producto);
+                await _context.SaveChangesAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Producto actualizado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
     }
 }
