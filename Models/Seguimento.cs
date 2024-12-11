@@ -19,6 +19,10 @@ public partial class Seguimento
 
     public int IdCatEstatus { get; set; }
 
+    public DateTime? ProximaVisita { get; set; }
+
+    public string? DescripcionProximaVisita { get; set; }
+
     public virtual ICollection<Evidencia> Evidencia { get; set; } = new List<Evidencia>();
 
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;

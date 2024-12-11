@@ -37,8 +37,6 @@ public partial class Usuario
 
     public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioCreacionNavigations { get; set; } = new List<ReporteServicio>();
 
-    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioEncargadoNavigations { get; set; } = new List<ReporteServicio>();
-
     public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioTecnicoNavigations { get; set; } = new List<ReporteServicio>();
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
