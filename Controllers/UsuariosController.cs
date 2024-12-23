@@ -8,6 +8,7 @@ using gaco_api.Models.DTOs.Responses.Usuarios;
 using gaco_api.Models.DTOs.Requests.Usuarios;
 using System.Linq;
 using gaco_api.Customs;
+using System.Security.Claims;
 
 namespace gaco_api.Controllers
 {

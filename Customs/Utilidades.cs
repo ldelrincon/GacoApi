@@ -5,16 +5,19 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using gaco_api.Models.DTOs.Responses.Usuarios;
+using Microsoft.AspNetCore.Mvc;
 
 namespace gaco_api.Customs
 {
     public class Utilidades
     {
         private readonly IConfiguration _configuration;
-
+        // private readonly IHttpContextAccessor _httpContextAccessor;
+        //public Utilidades(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         public Utilidades(IConfiguration configuration)
         {
             _configuration = configuration;
+            //_httpContextAccessor = httpContextAccessor;
         }
 
         public string EncriptarSHA256(string texto)
@@ -98,5 +101,79 @@ namespace gaco_api.Customs
             }
         }
 
+        public async Task<string> GuardarArchivoBase64Async(string carpeta, string extension, string base64)
+        {
+            try
+            {
+                // Crear la carpeta si no existe
+                var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
+                if (!Directory.Exists(rutaCarpeta))
+                {
+                    Directory.CreateDirectory(rutaCarpeta);
+                }
+
+                // Generar un nombre único para el archivo
+                var nombreUnico = $"{Guid.NewGuid()}_{DateTime.UtcNow:yyyyMMddHHmmss}";
+                var rutaArchivo = Path.Combine(rutaCarpeta, $"{nombreUnico}.{extension}");
+
+                // Convertir el Base64 a bytes y guardar el archivo
+                var bytes = Convert.FromBase64String(base64);
+                await File.WriteAllBytesAsync(rutaArchivo, bytes);
+
+                return rutaArchivo;
+                //return $"{carpeta}/{nombreUnico}.{extension}";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al guardar el archivo: {ex.Message}");
+            }
+        }
+
+        public async Task<string> ObtenerBase64Async(string rutaArchivo)
+        {
+            //rutaArchivo = ObtenerUrlArchivo(rutaArchivo);
+
+            if (string.IsNullOrWhiteSpace(rutaArchivo))
+            {
+                throw new ArgumentException("La ruta del archivo no puede estar vacía o ser nula.", nameof(rutaArchivo));
+            }
+
+            if (!File.Exists(rutaArchivo))
+            {
+                throw new FileNotFoundException("El archivo especificado no existe.", rutaArchivo);
+            }
+
+            try
+            {
+                // Leer el archivo como bytes
+                byte[] archivoBytes = await File.ReadAllBytesAsync(rutaArchivo);
+
+                // Convertir a Base64
+                return Convert.ToBase64String(archivoBytes);
+            }
+            catch (Exception ex)
+            {
+                // Registrar el error si es necesario y lanzar una excepción más descriptiva
+                throw new InvalidOperationException($"Error al convertir el archivo a Base64: {ex.Message}", ex);
+            }
+        }
+
+        //public string ObtenerUrlArchivo(string rutaRelativa)
+        //{
+        //    if (string.IsNullOrWhiteSpace(rutaRelativa))
+        //    {
+        //        throw new ArgumentException("La ruta relativa no puede estar vacía.", nameof(rutaRelativa));
+        //    }
+
+        //    // Normalizar la ruta relativa (reemplazar separadores de directorios)
+        //    rutaRelativa = rutaRelativa.Replace("\\", "/");
+
+        //    // URL base del servidor
+        //    var request = _httpContextAccessor?.HttpContext?.Request;
+        //    string urlBase = $"{request.Scheme}://{request.Host}";
+
+        //    // Combinar la URL base con la ruta relativa
+        //    return $"{urlBase}/{rutaRelativa}";
+        //}
     }
 }
