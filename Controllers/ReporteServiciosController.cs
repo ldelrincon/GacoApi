@@ -1,12 +1,15 @@
-﻿using gaco_api.Models;
+﻿using gaco_api.Customs;
+using gaco_api.Models;
 using gaco_api.Models.DTOs.Requests.ReporteSolicitudes;
 using gaco_api.Models.DTOs.Responses;
+using gaco_api.Models.DTOs.Responses.Evidencias;
+using gaco_api.Models.DTOs.Responses.Relaciones;
 using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Packaging.Signing;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Buffers.Text;
+using System.Security.Claims;
 
 namespace gaco_api.Controllers
 {
@@ -16,10 +19,14 @@ namespace gaco_api.Controllers
     public class ReporteServiciosController : ControllerBase
     {
         private readonly GacoDbContext _context;
+        private readonly Utilidades _utilidades;
+        private readonly IConfiguration _configuration;
 
-        public ReporteServiciosController(GacoDbContext context)
+        public ReporteServiciosController(GacoDbContext context, Utilidades utilidades, IConfiguration configuration)
         {
             _context = context;
+            _utilidades = utilidades;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -122,22 +129,56 @@ namespace gaco_api.Controllers
             if (reporteServicio != null)
             {
                 // Productos.
-                reporteServicio.Productos = new List<Producto>();
+                reporteServicio.Productos = new List<RelSeguimentoProductoResponse>();
                 // Evidencias.
-                reporteServicio.Evidencias = new List<Evidencia>();
+                reporteServicio.Evidencias = new List<EvidenciaResponse>();
                 // Obtener el primer seguimento.
-                var primerSeguimento = await _context.Seguimentos.FirstOrDefaultAsync(x => x.IdReporteServicio == reporteServicio.Id);
+                var primerSeguimento = await _context.Seguimentos
+                    .Include(x=> x.Evidencia)
+                    .Include(x => x.RelSeguimentoProductos).ThenInclude(x=> x.IdProductoNavigation)
+                    .FirstOrDefaultAsync(x => x.IdReporteServicio == reporteServicio.Id);
+
                 if (primerSeguimento != null) {
-                    // Obtener relacion de productos.
-                    var relSeguimentoProductos = primerSeguimento.RelSeguimentoProductos.ToList();
-                    foreach (var item in relSeguimentoProductos)
+                    // Llenar Productos.
+                    foreach (var item in primerSeguimento.RelSeguimentoProductos)
                     {
-                        reporteServicio.Productos.Add(item.IdProductoNavigation);
+                        reporteServicio.Productos.Add(new RelSeguimentoProductoResponse()
+                        {
+                            Cantidad = item.Cantidad,
+                            FechaCreacion = item.FechaCreacion,
+                            FechaModificacion = item.FechaModificacion,
+                            Id = item.Id,
+                            IdCatEstatus = item.IdCatEstatus,
+                            IdProducto = item.IdProducto,
+                            IdSeguimento = item.IdSeguimento,
+                            IdUsuario = item.IdUsuario,
+                            MontoGasto = item.MontoGasto,
+                            MontoVenta = item.MontoVenta,
+                            Codigo = item.IdProductoNavigation.Codigo,
+                            Producto = item.IdProductoNavigation.Producto1, 
+                            Unidad = item.Unidad
+                        });
                     }
-                    // Evidencias.
-                    reporteServicio.Evidencias = primerSeguimento.Evidencia.ToList();
+
+                    // Llenar Evidencias.
+                    foreach (var item in primerSeguimento.Evidencia)
+                    {
+                        reporteServicio.Evidencias.Add(new EvidenciaResponse()
+                        {
+                            Extension = item.Extension,
+                            FechaCreacion = item.FechaCreacion,
+                            FechaModificacion = item.FechaModificacion,
+                            Id = item.Id,
+                            IdCatEstatus = item.IdCatEstatus,
+                            IdSeguimento = item.IdSeguimento,
+                            Nombre = item.Nombre,
+                            Ruta = item.Ruta,
+                            Base64 = await _utilidades.ObtenerBase64Async(item.Ruta),
+                        });
+                    }
+
                     // Proxima Visita.
-                    reporteServicio.FechaProximaVisita = primerSeguimento.ProximaVisita;
+                    reporteServicio.ProximaVisita = primerSeguimento.ProximaVisita;
                     reporteServicio.DescripcionProximaVisita = primerSeguimento.DescripcionProximaVisita;
                 }
             }
@@ -174,31 +215,40 @@ namespace gaco_api.Controllers
                     return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
                 }
 
-                var existeCatTipoSolicitudes = await _context.CatTipoSolicitudes.AnyAsync(m => m.Id == request.IdCatSolicitud);
-                if (!existeCatTipoSolicitudes)
+                request.IdCatSolicitud = 1;
+               
+                // Obtener el ID del usuario conectado
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!long.TryParse(nameIdentifier, out long userId))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+
+                request.IdUsuarioCreacion = userId;
+
+                // Validar existencia de entidades relacionadas
+                if (!await _context.CatTipoSolicitudes.AnyAsync(m => m.Id == request.IdCatSolicitud))
                 {
                     return Conflict(new DefaultResponse<object> { Message = "El tipo de solicitud no existe o no se encontró." });
                 }
 
-                var existeUsuarioCreacion = await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioCreacion);
-                if (!existeUsuarioCreacion)
+                if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioCreacion))
                 {
                     return Conflict(new DefaultResponse<object> { Message = "No se encontró el usuario." });
                 }
 
-                var existeCliente = await _context.Clientes.AnyAsync(m => m.Id == request.IdCliente);
-                if (!existeCliente)
+                if (!await _context.Clientes.AnyAsync(m => m.Id == request.IdCliente))
                 {
                     return Conflict(new DefaultResponse<object> { Message = "El cliente no existe o no se encontró." });
                 }
 
-                var existeUsuarioTecnico = await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico);
-                if (!existeUsuarioTecnico)
+                if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
                 {
                     return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
                 }
 
-                var nuevo = new ReporteServicio()
+                // Crear el nuevo reporte de servicio
+                var nuevo = new ReporteServicio
                 {
                     IdCatSolicitud = request.IdCatSolicitud,
                     IdUsuarioCreacion = request.IdUsuarioCreacion,
@@ -215,55 +265,86 @@ namespace gaco_api.Controllers
                     UsuarioEncargado = request.UsuarioEncargado,
                 };
                 await _context.ReporteServicios.AddAsync(nuevo);
+                await _context.SaveChangesAsync();
 
-                // Crear el primer seguimento.
-                var primerSeguimento = new Seguimento() {
+                // Crear el primer seguimiento
+                var primerSeguimiento = new Seguimento
+                {
                     IdReporteServicio = nuevo.Id,
-                    // IdUsuario = #Obtener id desde la sesion.
-                    Seguimento1 = "Primer Seguimento", 
+                    IdUsuario = userId,
+                    Seguimento1 = _configuration["ValoresDefault:NombrePrimerSeguimento"] ?? "",
                     IdCatEstatus = 1,
-                    ProximaVisita = request.FechaProximaVisita,
+                    ProximaVisita = request.ProximaVisita,
                     DescripcionProximaVisita = request.DescripcionProximaVisita,
                 };
-                await _context.Seguimentos.AddAsync(primerSeguimento);
+                await _context.Seguimentos.AddAsync(primerSeguimiento);
+                await _context.SaveChangesAsync();
 
-                // Relacion Seguimento Productos.
+                // Validar y relacionar productos
                 if (request.Productos != null && request.Productos.Any())
                 {
                     foreach (var producto in request.Productos)
                     {
-                        var relSeguimentoProducto = new RelSeguimentoProducto() {
-                            IdSeguimento = primerSeguimento.Id,
+                        if (!await _context.Productos.AnyAsync(x => x.Id == producto.Id))
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "El producto no se encontró." });
+                        }
+
+                        if (producto.Cantidad <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "La cantidad de producto debe ser mayor a 0." });
+                        }
+
+                        var relSeguimentoProducto = new RelSeguimentoProducto
+                        {
+                            IdSeguimento = primerSeguimiento.Id,
                             IdProducto = producto.Id,
-                            // IdUsuario = #Obtener id desde la sesion.
-                            IdCatEstatus =1,
-                            //Cantidad = producto.Cantidad,
+                            IdUsuario = userId,
+                            IdCatEstatus = 1,
+                            Cantidad = producto.Cantidad,
                             Unidad = "",
                         };
                         await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProducto);
+                        await _context.SaveChangesAsync();
                     }
                 }
 
+                // Procesar evidencias
                 if (request.Evidencias != null && request.Evidencias.Any())
                 {
                     foreach (var evidenciaRS in request.Evidencias)
                     {
-                        var evidencia = new Evidencia()
+                        string rutaEvidencia;
+                        try
                         {
-                            IdSeguimento = primerSeguimento.Id,
+                            rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
+                                $"Evidencias/Seguimento_{primerSeguimiento.Id}", 
+                                evidenciaRS.Extension, 
+                                evidenciaRS.Base64
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = $"Error al guardar evidencia: {ex.Message}" });
+                        }
+
+                        var evidencia = new Evidencia
+                        {
+                            IdSeguimento = primerSeguimiento.Id,
                             Nombre = evidenciaRS.Nombre,
-                            Extension = evidenciaRS.Extencion,
-                            Ruta = $"/Evidencias/S{primerSeguimento.Id}/D{DateTime.Now.ToBinary()}E{evidenciaRS.Nombre}.{evidenciaRS.Extencion}",
+                            Extension = evidenciaRS.Extension,
+                            Ruta = rutaEvidencia,
                             IdCatEstatus = 1,
                         };
                         await _context.Evidencias.AddAsync(evidencia);
-                        // Guardar base64.
+                        await _context.SaveChangesAsync();
                     }
                 }
 
-                await _context.SaveChangesAsync();
-
-                // Confirmar la transacción
+                // await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return Ok(new DefaultResponse<object>
@@ -274,89 +355,163 @@ namespace gaco_api.Controllers
             }
             catch (Exception ex)
             {
-                // Revertir la transacción en caso de error
                 await transaction.RollbackAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
+        
+        [HttpPost]
+        [Route("Actualizar")]
+        public async Task<ActionResult> ActualizarReporteServicio(ActualizarReporteServicioRequest request)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
 
+                // Obtener el ID del usuario conectado
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!long.TryParse(nameIdentifier, out long userId))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+
+                // Verificar existencia del reporte
+                var reporte = await _context.ReporteServicios
+                    .Include(r => r.Seguimentos).ThenInclude(r=> r.Evidencia)
+                    .FirstOrDefaultAsync(r => r.Id == request.Id);
+
+                if (reporte == null)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El reporte no existe o no se encontró." });
+                }
+
+                // Validar existencia de entidades relacionadas
+                if (!await _context.Clientes.AnyAsync(m => m.Id == request.IdCliente))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El cliente no existe o no se encontró." });
+                }
+
+                if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
+                }
+
+                // Actualizar los datos del reporte
+                reporte.IdCliente = request.IdCliente;
+                reporte.Titulo = request.Titulo;
+                reporte.Descripcion = request.Descripcion;
+                reporte.ServicioPreventivo = request.ServicioPreventivo;
+                reporte.ServicioCorrectivo = request.ServicioCorrectivo;
+                reporte.ObservacionesRecomendaciones = request.ObservacionesRecomendaciones;
+                reporte.UsuarioEncargado = request.UsuarioEncargado;
+                reporte.FechaInicio = request.FechaInicio;
+                //reporte.IdUsuarioModificacion = userId;
+                reporte.FechaModificacion = DateTime.UtcNow;
+
+                _context.ReporteServicios.Update(reporte);
+                await _context.SaveChangesAsync();
+
+                // Validar y actualizar productos relacionados
+                var seguimiento = reporte.Seguimentos.FirstOrDefault();
+                if (seguimiento != null && request.Productos != null && request.Productos.Any())
+                {
+                    var productosActuales = await _context.RelSeguimentoProductos
+                        .Where(r => r.IdSeguimento == seguimiento.Id)
+                        .ToListAsync();
+
+                    _context.RelSeguimentoProductos.RemoveRange(productosActuales);
+                    await _context.SaveChangesAsync();
+
+                    foreach (var producto in request.Productos)
+                    {
+                        if (!await _context.Productos.AnyAsync(x => x.Id == producto.Id))
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "El producto no se encontró." });
+                        }
+
+                        if (producto.Cantidad <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "La cantidad de producto debe ser mayor a 0." });
+                        }
+
+                        var nuevoProducto = new RelSeguimentoProducto
+                        {
+                            IdSeguimento = seguimiento.Id,
+                            IdProducto = producto.Id,
+                            IdUsuario = userId,
+                            IdCatEstatus = 1,
+                            Cantidad = producto.Cantidad,
+                            Unidad = "",
+                        };
+
+                        await _context.RelSeguimentoProductos.AddAsync(nuevoProducto);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                // Procesar evidencias
+                if (request.Evidencias != null && request.Evidencias.Any())
+                {
+                    var evidenciasActuales = await _context.Evidencias
+                        .Where(e => e.IdSeguimento == seguimiento!.Id)
+                        .ToListAsync();
+
+                    _context.Evidencias.RemoveRange(evidenciasActuales);
+                    await _context.SaveChangesAsync();
+
+                    foreach (var evidenciaRS in request.Evidencias)
+                    {
+                        string rutaEvidencia;
+                        try
+                        {
+                            rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
+                                $"Evidencias/Seguimento_{seguimiento!.Id}",
+                                evidenciaRS.Extension,
+                                evidenciaRS.Base64
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = $"Error al guardar evidencia: {ex.Message}" });
+                        }
+
+                        var nuevaEvidencia = new Evidencia
+                        {
+                            IdSeguimento = seguimiento.Id,
+                            Nombre = evidenciaRS.Nombre,
+                            Extension = evidenciaRS.Extension,
+                            Ruta = rutaEvidencia,
+                            IdCatEstatus = 1,
+                        };
+
+                        await _context.Evidencias.AddAsync(nuevaEvidencia);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Reporte actualizado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new DefaultResponse<object> { Message = ex.Message });
             }
         }
 
-
-        //[HttpPost]
-        //[Route("Actualizar")]
-        //public async Task<ActionResult> ActualizarProducto(ActualizarReporteServicioRequest request)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
-        //        }
-
-        //        var reporteServicio = await _context.ReporteServicios.FindAsync(request.Id);
-        //        if (reporteServicio == null)
-        //        {
-        //            return NotFound(new DefaultResponse<object> { Message = "Reporte Servicio no encontrado." });
-        //        }
-
-        //        var existeCatTipoSolicitudes = await _context.CatTipoSolicitudes.AnyAsync(m => m.Id == request.IdCatSolicitud);
-        //        if (!existeCatTipoSolicitudes)
-        //        {
-        //            return Conflict(new DefaultResponse<object> { Message = "El tipo de solicitud no exite o no se encontro." });
-        //        }
-
-        //        var existeUsuarioCreacion = await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioCreacion);
-        //        if (existeUsuarioCreacion)
-        //        {
-        //            return Conflict(new DefaultResponse<object> { Message = "No se encontro el usuario." });
-        //        }
-
-        //        var existeCliente = await _context.Clientes.AnyAsync(m => m.Id == request.IdCliente);
-        //        if (existeCliente)
-        //        {
-        //            return Conflict(new DefaultResponse<object> { Message = "El cliente no existe o no se encontro." });
-        //        }
-
-        //        var existeUsuarioTecnico = await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico);
-        //        if (existeUsuarioTecnico)
-        //        {
-        //            return Conflict(new DefaultResponse<object> { Message = "El tecnico no existe o no se encontro." });
-        //        }
-
-        //        // Actualizar los datos
-        //        // reporteServicio.Id { get; set; }
-        //        reporteServicio.IdCatSolicitud = request.IdCatSolicitud;
-        //        reporteServicio.IdUsuarioCreacion = request.IdUsuarioCreacion;
-        //        reporteServicio.IdCliente = request.IdCliente;
-        //        reporteServicio.Titulo = request.Titulo;
-        //        reporteServicio.Descripcion = request.Descripcion;
-        //        reporteServicio.IdCatEstatus = request.IdCatEstatus;
-        //        reporteServicio.FechaInicio = request.FechaInicio;
-        //        reporteServicio.Accesorios = request.Accesorios;
-        //        reporteServicio.ServicioPreventivo = request.ServicioPreventivo;
-        //        reporteServicio.ServicioCorrectivo = request.ServicioCorrectivo;
-        //        reporteServicio.ObservacionesRecomendaciones = request.ObservacionesRecomendaciones;
-        //        reporteServicio.IdUsuarioTecnico = request.IdUsuarioTecnico;
-        //        reporteServicio.UsuarioEncargado = request.UsuarioEncargado;
-        //        reporteServicio.IdCatEstatus = request.IdCatEstatus;
-        //        reporteServicio.FechaModificacion = DateTime.Now;
-
-        //        // Guardar los cambios
-        //        _context.ReporteServicios.Update(reporteServicio);
-        //        await _context.SaveChangesAsync();
-
-        //        return Ok(new DefaultResponse<object>
-        //        {
-        //            Success = true,
-        //            Message = "Reporte Solicitud actualizado correctamente."
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError,
-        //            new DefaultResponse<object> { Message = ex.Message });
-        //    }
-        //}
     }
 }

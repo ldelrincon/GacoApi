@@ -1,4 +1,7 @@
-﻿namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
+﻿using gaco_api.Models.DTOs.Responses.Evidencias;
+using gaco_api.Models.DTOs.Responses.Relaciones;
+
+namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
 {
     public class EditarReporteServicioResponse
     {
@@ -19,9 +22,9 @@
         public long IdUsuarioTecnico { get; set; }
         public string UsuarioEncargado { get; set; } = null!;
 
-        public List<Producto>? Productos { get; set; }
-        public List<Evidencia>? Evidencias { get; set; }
-        public DateTime? FechaProximaVisita {  get; set; }
+        public List<RelSeguimentoProductoResponse>? Productos { get; set; }
+        public List<EvidenciaResponse>? Evidencias { get; set; }
+        public DateTime? ProximaVisita {  get; set; }
         public string? DescripcionProximaVisita { get; set; }
     }
 }

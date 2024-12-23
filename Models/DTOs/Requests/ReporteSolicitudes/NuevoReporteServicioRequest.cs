@@ -20,7 +20,7 @@ namespace gaco_api.Models.DTOs.Requests.ReporteSolicitudes
 
         public List<ProductoReporteServicioRequest>? Productos { get; set; }
         public List<EvidenciaReporteServicioRequest>? Evidencias { get; set; }
-        public DateTime? FechaProximaVisita { get; set; }
+        public DateTime? ProximaVisita { get; set; }
         public string? DescripcionProximaVisita { get; set; }
     }
 }

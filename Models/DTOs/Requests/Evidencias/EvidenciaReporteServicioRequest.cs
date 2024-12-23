@@ -3,7 +3,7 @@
     public class EvidenciaReporteServicioRequest
     {
         public string Nombre { get; set; }
-        public string Extencion { get; set; }
+        public string Extension { get; set; }
         public decimal Tamanio { get; set; }
         public string Base64 { get; set; }
     }
