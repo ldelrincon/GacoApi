@@ -1040,3 +1040,12 @@ C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\refint\gaco_api.dll
 C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\gaco_api.pdb
 C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\gaco_api.genruntimeconfig.cache
 C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\ref\gaco_api.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\libwkhtmltox.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\DinkToPdf.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\HtmlAgilityPack.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\MailKit.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\MimeKit.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\OpenHtmlToPdf.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll

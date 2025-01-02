@@ -5,6 +5,7 @@ using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Evidencias;
 using gaco_api.Models.DTOs.Responses.Relaciones;
 using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
+using gaco_api.Utilerias;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,14 @@ namespace gaco_api.Controllers
         private readonly GacoDbContext _context;
         private readonly Utilidades _utilidades;
         private readonly IConfiguration _configuration;
+         private readonly IWebHostEnvironment _env;
 
-        public ReporteServiciosController(GacoDbContext context, Utilidades utilidades, IConfiguration configuration)
+        public ReporteServiciosController(GacoDbContext context, Utilidades utilidades, IConfiguration configuration, IWebHostEnvironment env)
         {
             _context = context;
             _utilidades = utilidades;
             _configuration = configuration;
+            _env = env;
         }
 
         [HttpPost]
@@ -94,6 +97,95 @@ namespace gaco_api.Controllers
             };
 
             return Ok(response);
+        }
+
+        /// <summary>
+        ///  Accion para guardar un nuevo gestor.
+        /// </summary>
+        /// <param name="ObjModGestor">Objeto con la informacion del nuevo gestor.</param>
+        /// <returns>Objeto respuesta.</returns>
+        [HttpGet]
+        [Route("SendEmail/{id}")]
+
+        public async Task<IActionResult> SendEmail(long id)
+        {
+
+            ClsModCorreo objCorreo = new ClsModCorreo();
+            var response = new DefaultResponse<EditarReporteServicioResponse>();
+
+            var reporteServicio = await _context.ReporteServicios
+                .Where(x => x.Id == id)
+                .Select(x => new EditarReporteServicioResponse
+                {
+                    Id = x.Id,
+                    IdCatSolicitud = x.IdCatSolicitud,
+                    IdUsuarioCreacion = x.IdUsuarioCreacion,
+                    IdCliente = x.IdCliente,
+                    Titulo = x.Titulo,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    FechaInicio = x.FechaInicio,
+                    Accesorios = x.Accesorios,
+                    ServicioPreventivo = x.ServicioPreventivo,
+                    ServicioCorrectivo = x.ServicioCorrectivo,
+                    ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    UsuarioEncargado = x.UsuarioEncargado,
+                    // productos = 
+                }).FirstOrDefaultAsync();
+
+            //byte[] pdfBytes = Convert.FromBase64String(ObjModCorreo.archivo);
+
+            //string FormatCorreo;
+            //if (ObjModCorreo.isGaleria)
+            //{
+            //    FormatCorreo = "envioEvidenciaGaleria.html";
+            //}
+            //else
+            //{
+            //    FormatCorreo = "envioEvidencia.html";
+            //}
+
+            ClsModResult result = new();
+
+            try
+            {
+                var TargetCorreo = new ClsModCorreo();
+                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
+                TargetCorreo.strFromNombre = string.Empty;
+                TargetCorreo.strCC = string.Empty;
+
+                TargetCorreo.strSubject = "Servicio a facturar";
+
+                //TargetCorreo.attachments = new List<ClsModAttachment>
+                //{
+                //    new ClsModAttachment
+                //    {
+                //        FileName = "evidencia.pdf",
+                //        ContentType = "application/pdf",
+                //        FileContent = pdfBytes
+                //    }
+                //};
+
+
+                TargetCorreo.strBody = "Servicio para facturación";
+                TargetCorreo.strPassword = "NotificacionesGACO1";
+                TargetCorreo.intPuerto = 587;
+                TargetCorreo.strHost = "smtp.ionos.com";
+                TargetCorreo.usaSSL = false;
+
+                NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath);
+            }
+            catch (Exception ex)
+            {
+                result.MsgError = ex.ToString();
+            }
+
+            if (result.IsError) return BadRequest(result.MsgError);
+            else return Ok(result);
         }
 
         [HttpGet]
