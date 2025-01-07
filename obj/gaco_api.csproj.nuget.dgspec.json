@@ -87,10 +87,6 @@
               "target": "Package",
               "version": "[4.9.0, )"
             },
-            "OpenHtmlToPdf": {
-              "target": "Package",
-              "version": "[1.12.0, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"

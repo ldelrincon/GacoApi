@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "o9g8zveT4s8=",
+  "dgSpecHash": "wGjO8cPaaB0=",
   "success": true,
   "projectFilePath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
   "expectedPackageFiles": [
@@ -135,7 +135,6 @@
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.projectmodel\\6.11.0\\nuget.projectmodel.6.11.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.protocol\\6.11.0\\nuget.protocol.6.11.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.versioning\\6.11.0\\nuget.versioning.6.11.0.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\openhtmltopdf\\1.12.0\\openhtmltopdf.1.12.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system\\4.0.0\\runtime.native.system.4.0.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system.io.compression\\4.1.0\\runtime.native.system.io.compression.4.1.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system.net.http\\4.0.1\\runtime.native.system.net.http.4.0.1.nupkg.sha512",
@@ -233,16 +232,5 @@
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\system.xml.readerwriter\\4.0.11\\system.xml.readerwriter.4.0.11.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\system.xml.xdocument\\4.0.11\\system.xml.xdocument.4.0.11.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "El paquete \"OpenHtmlToPdf 1.12.0\" se restauró con \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\" en lugar de la plataforma de destino del proyecto \"net8.0\". Puede que el paquete no sea totalmente compatible con el proyecto.",
-      "libraryId": "OpenHtmlToPdf",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  "logs": []
 }

@@ -2231,15 +2231,6 @@
           "lib/netstandard2.0/NuGet.Versioning.dll": {}
         }
       },
-      "OpenHtmlToPdf/1.12.0": {
-        "type": "package",
-        "compile": {
-          "lib/net45/OpenHtmlToPdf.dll": {}
-        },
-        "runtime": {
-          "lib/net45/OpenHtmlToPdf.dll": {}
-        }
-      },
       "runtime.native.System/4.0.0": {
         "type": "package",
         "dependencies": {
@@ -8042,18 +8033,6 @@
         "nuget.versioning.nuspec"
       ]
     },
-    "OpenHtmlToPdf/1.12.0": {
-      "sha512": "DMMyVfsJN4RKS/HdZu3isdDhVE5VMhphVZikTw6qCFWZUuq32kS4JSR34MggIwAaw0dOTtmJRj9iVhqitEidDg==",
-      "type": "package",
-      "path": "openhtmltopdf/1.12.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net45/OpenHtmlToPdf.dll",
-        "openhtmltopdf.1.12.0.nupkg.sha512",
-        "openhtmltopdf.nuspec"
-      ]
-    },
     "runtime.native.System/4.0.0": {
       "sha512": "QfS/nQI7k/BLgmLrw7qm7YBoULEvgWnPI+cYsbfCVFTW8Aj+i8JhccxcFMu1RWms0YZzF+UHguNBK4Qn89e2Sg==",
       "type": "package",
@@ -12353,7 +12332,6 @@
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.10",
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 8.0.6",
       "MimeKit >= 4.9.0",
-      "OpenHtmlToPdf >= 1.12.0",
       "Swashbuckle.AspNetCore >= 6.6.2",
       "System.IdentityModel.Tokens.Jwt >= 8.1.2"
     ]
@@ -12444,10 +12422,6 @@
             "target": "Package",
             "version": "[4.9.0, )"
           },
-          "OpenHtmlToPdf": {
-            "target": "Package",
-            "version": "[1.12.0, )"
-          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.6.2, )"
@@ -12479,17 +12453,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "El paquete \"OpenHtmlToPdf 1.12.0\" se restauró con \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\" en lugar de la plataforma de destino del proyecto \"net8.0\". Puede que el paquete no sea totalmente compatible con el proyecto.",
-      "libraryId": "OpenHtmlToPdf",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  }
 }
