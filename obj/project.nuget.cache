@@ -2,7 +2,7 @@
   "version": 2,
   "dgSpecHash": "wGjO8cPaaB0=",
   "success": true,
-  "projectFilePath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
+  "projectFilePath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
@@ -135,6 +135,7 @@
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.projectmodel\\6.11.0\\nuget.projectmodel.6.11.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.protocol\\6.11.0\\nuget.protocol.6.11.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\nuget.versioning\\6.11.0\\nuget.versioning.6.11.0.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\openhtmltopdf\\1.12.0\\openhtmltopdf.1.12.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system\\4.0.0\\runtime.native.system.4.0.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system.io.compression\\4.1.0\\runtime.native.system.io.compression.4.1.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\runtime.native.system.net.http\\4.0.1\\runtime.native.system.net.http.4.0.1.nupkg.sha512",
