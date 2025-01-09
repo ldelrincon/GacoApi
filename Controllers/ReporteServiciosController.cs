@@ -1,5 +1,6 @@
 ﻿using gaco_api.Customs;
 using gaco_api.Models;
+using gaco_api.Models.DTOs.Requests;
 using gaco_api.Models.DTOs.Requests.ReporteSolicitudes;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Evidencias;
@@ -605,5 +606,71 @@ namespace gaco_api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("BusquedaSeguimentoActivo")]
+        public async Task<IActionResult> BusquedaSeguimentoActivo(BusquedaGenericoRequest request)
+        {
+            // Obtener el ID del usuario conectado
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!long.TryParse(nameIdentifier, out long userId))
+            {
+                return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+            }
+
+            // Construir la consulta inicial
+            var query = _context.ReporteServicios
+                .Include(x => x.IdCatEstatusNavigation)
+                .AsQueryable();
+
+            query = query.Where(
+                x => x.IdCatSolicitud == 1 && 
+                x.IdCatEstatus == 3 && 
+                x.IdUsuarioCreacion == userId
+            );
+
+            if (request.CantidadPorPagina == -1)
+            {
+                request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
+            }
+
+            // Seleccionar y aplicar paginación
+            var reporteServicios = await query
+                .Select(x => new ReporteServicioResponse
+                {
+                    Id = x.Id,
+                    IdCatSolicitud = x.IdCatSolicitud,
+                    IdUsuarioCreacion = x.IdUsuarioCreacion,
+                    IdCliente = x.IdCliente,
+                    Titulo = x.Titulo,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    FechaInicio = x.FechaInicio,
+                    Accesorios = x.Accesorios,
+                    ServicioPreventivo = x.ServicioPreventivo,
+                    ServicioCorrectivo = x.ServicioCorrectivo,
+                    ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    UsuarioEncargado = x.UsuarioEncargado,
+                    Estatus = x.IdCatEstatusNavigation.Estatus,
+                    UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+                    Cliente = x.IdClienteNavigation.Nombre,
+                    CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+                    UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                })
+                .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+                .Take(request.CantidadPorPagina)
+                .ToListAsync();
+
+            // Crear la respuesta
+            var response = new DefaultResponse<List<ReporteServicioResponse>>
+            {
+                Success = true,
+                Data = reporteServicios,
+            };
+
+            return Ok(response);
+        }
     }
 }
