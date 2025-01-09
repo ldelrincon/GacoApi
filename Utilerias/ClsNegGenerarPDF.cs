@@ -1,6 +1,8 @@
 using System.Configuration;
+using System.Globalization;
 using System.Text;
 using DinkToPdf;
+using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
 using HtmlAgilityPack;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Html;
@@ -101,7 +103,7 @@ namespace ClbNegGestores
             return base64;
         }
 
-        public  string ExportPDFPlantillaSolicitudInvestigacionpdf(string Folio, string Path, string srcImage)
+        public  string ExportPDFPlantillaSolicitudInvestigacionpdf(string Folio, string Path, string srcImage, ReporteServicioResponse objReporteServicioResponse)
         {
             HtmlDocument doc2 = new HtmlDocument();
 
@@ -109,46 +111,42 @@ namespace ClbNegGestores
             var converter = new BasicConverter(new PdfTools());
             string htmlString = "";
             byte[] pdf = null;
-
+            string strTablaProductos = GenerarTablaHtml(objReporteServicioResponse);
             string base64 = "";
             try
             {
                 
                 string RutaCorreosNezterLoanding = srcImage;
                 doc2.Load(Path);
+                string strPreventivo="No", strCorrectivo="No";
+                if (objReporteServicioResponse.ServicioPreventivo == true)
+                {
+                    strPreventivo = "Si";
+                }
+                if (objReporteServicioResponse.ServicioCorrectivo == true)
+                {
+                    strCorrectivo = "Si";
+                }
+                doc2.GetElementbyId("NoServicio").InnerHtml = objReporteServicioResponse.Id.ToString();
+                doc2.GetElementbyId("FechaInicio").InnerHtml = objReporteServicioResponse.FechaInicio.ToString();
+                doc2.GetElementbyId("Cliente").InnerHtml = objReporteServicioResponse.Cliente;
+                doc2.GetElementbyId("Telefono").InnerHtml = objReporteServicioResponse.Telefono;
+                doc2.GetElementbyId("Correo").InnerHtml = objReporteServicioResponse.Correo;
+                doc2.GetElementbyId("RazonSocial").InnerHtml = objReporteServicioResponse.RazonSocial;
+                doc2.GetElementbyId("Direccion").InnerHtml = objReporteServicioResponse.Direccion+" C.P:"+objReporteServicioResponse.CodigoPostal;
+                doc2.GetElementbyId("DatosEquipo").InnerHtml = objReporteServicioResponse.Titulo;
+                doc2.GetElementbyId("Accesorios").InnerHtml = objReporteServicioResponse.Accesorios;
+                doc2.GetElementbyId("Preventivo").InnerHtml = strPreventivo;
+                doc2.GetElementbyId("Correctivo").InnerHtml = strCorrectivo;
+                doc2.GetElementbyId("TrabajoRealizado").InnerHtml = objReporteServicioResponse.Descripcion;
+                doc2.GetElementbyId("Observaciones").InnerHtml = objReporteServicioResponse.ObservacionesRecomendaciones;
+                doc2.GetElementbyId("EncargadoArea").InnerHtml = objReporteServicioResponse.UsuarioEncargado;
+                doc2.GetElementbyId("TecnicoEncargado").InnerHtml = objReporteServicioResponse.UsuarioTecnico;
+                doc2.GetElementbyId("FechaVisita").InnerHtml = objReporteServicioResponse.ProximaVisita.ToString();
+                doc2.GetElementbyId("DescripcionVisita").InnerHtml = objReporteServicioResponse.DescripcionProximaVisita;
+                doc2.GetElementbyId("RegimenFiscal").InnerHtml = objReporteServicioResponse.RegimenFiscal;
+                doc2.GetElementbyId("Productos").InnerHtml = strTablaProductos;
 
-                //doc2.GetElementbyId("folio").InnerHtml = Folio;
-                //doc.GetElementbyId("folio").InnerHtml = objPlantilla.FolioSolicitud;
-                //doc.GetElementbyId("MunicipioTitulo").InnerHtml = objPlantilla.Municipio;
-                //doc.GetElementbyId("EstadoTitulo").InnerHtml = objPlantilla.Estado;
-                //doc.GetElementbyId("Estado").InnerHtml = objPlantilla.Estado;
-                //doc.GetElementbyId("TipoInscripcion").InnerHtml = objPlantilla.TipoTransaccion;
-                //doc.GetElementbyId("FechaInscripcion").InnerHtml = objPlantilla.FechaInscripcion.ToString("dd/MM/yyyy");
-                //doc.GetElementbyId("FechaDocumento").InnerHtml = objPlantilla.FechaDocumento.ToString("dd/MM/yyyy");
-                //doc.GetElementbyId("Foja").InnerHtml = objPlantilla.Fojas;
-                //doc.GetElementbyId("TomoInscripcion").InnerHtml = objPlantilla.TomoInscripcion;
-                //doc.GetElementbyId("Seccion").InnerHtml = objPlantilla.Seccion;
-                //doc.GetElementbyId("NoInscripcion").InnerHtml = objPlantilla.NumeroInscripcion;
-                //doc.GetElementbyId("Municipio").InnerHtml = objPlantilla.Municipio;
-
-                //if (tipoPlantilla == 3)
-                //{
-                //    doc.GetElementbyId("FolioDocumento").InnerHtml = objPlantilla.FolioDocumento;
-                //    doc.GetElementbyId("NoExpedienteDocumento").InnerHtml = objPlantilla.NoExpedienteDocumento;
-                //    doc.GetElementbyId("AutoridadEmisoraDocumento").InnerHtml = objPlantilla.AutoridadEmisora;
-                //    doc.GetElementbyId("DescripcionOficioDocumento").InnerHtml = objPlantilla.DescripcionOficio;
-                //    doc.GetElementbyId("Solicitante").InnerHtml = objPlantilla.Solicitante;                    
-                //}
-                //else
-                //{
-                //    doc.GetElementbyId("Volumen").InnerHtml = objPlantilla.Volumen;
-                //    doc.GetElementbyId("TomoDocumento").InnerHtml = objPlantilla.TomoDocumento;
-                //    doc.GetElementbyId("CiudadNotario").InnerHtml = objPlantilla.MunicipioNotario;
-                //    doc.GetElementbyId("Notario").InnerHtml = objPlantilla.Notario;
-                //    doc.GetElementbyId("DescripcionActo").InnerHtml = objPlantilla.DescripcionActo;
-                //    doc.GetElementbyId("DescripcionInmueble").InnerHtml = objPlantilla.DescripcionInmueble;
-                //    doc.GetElementbyId("ClaveCatastral").InnerHtml = objPlantilla.ClaveCatastral;
-                //}
 
                 doc2.GetElementbyId("RutaCorreosNezterLoanding").SetAttributeValue("src", RutaCorreosNezterLoanding);
                 htmlString = doc2.DocumentNode.OuterHtml;
@@ -163,6 +161,35 @@ namespace ClbNegGestores
             return htmlString;
         }
 
-     
+        static string GenerarTablaHtml(ReporteServicioResponse objReporteServicioResponse)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("<table border=\"1\">");
+            sb.AppendLine("  <thead>");
+            sb.AppendLine("    <tr>");
+            //sb.AppendLine("      <th>ID</th>");
+            sb.AppendLine("      <th>Producto</th>");
+            sb.AppendLine("      <th>Cantidad</th>");
+            sb.AppendLine("    </tr>");
+            sb.AppendLine("  </thead>");
+            sb.AppendLine("  <tbody>");
+
+            foreach (var objProductos in objReporteServicioResponse.Productos)
+            {
+                sb.AppendLine("    <tr>");
+                sb.AppendLine($"      <td>{objProductos.Producto}</td>");
+                sb.AppendLine($"      <td>{objProductos.Cantidad}</td>");
+                //sb.AppendLine($"      <td>{persona.Edad}</td>");
+                sb.AppendLine("    </tr>");
+            }
+
+            sb.AppendLine("  </tbody>");
+            sb.AppendLine("</table>");
+
+            return sb.ToString();
+        }
+
+
     }
 }

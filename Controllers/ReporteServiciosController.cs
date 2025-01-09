@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Buffers.Text;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace gaco_api.Controllers
 {
@@ -107,46 +108,105 @@ namespace gaco_api.Controllers
         [HttpGet]
         [Route("SendEmail/{id}")]
 
-        public async Task<IActionResult> SendEmail(long id)
+        public async Task<IActionResult> SendEmail(long Id)
         {
 
+            // Construir la consulta inicial
+            var query = _context.ReporteServicios
+                .Include(x => x.IdCatEstatusNavigation)
+                .AsQueryable();
+
             ClsModCorreo objCorreo = new ClsModCorreo();
-            var response = new DefaultResponse<EditarReporteServicioResponse>();
+            var reporteServicios = await query
+             .Select(x => new ReporteServicioResponse
+             {
+                 Id = x.Id,
+                 IdCatSolicitud = x.IdCatSolicitud,
+                 IdUsuarioCreacion = x.IdUsuarioCreacion,
+                 IdCliente = x.IdCliente,
+                 Titulo = x.Titulo,
+                 Descripcion = x.Descripcion,
+                 FechaCreacion = x.FechaCreacion,
+                 FechaModificacion = x.FechaModificacion,
+                 IdCatEstatus = x.IdCatEstatus,
+                 FechaInicio = x.FechaInicio,
+                 Accesorios = x.Accesorios,
+                 ServicioPreventivo = x.ServicioPreventivo,
+                 ServicioCorrectivo = x.ServicioCorrectivo,
+                 ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                 IdUsuarioTecnico = x.IdUsuarioTecnico,
+                 UsuarioEncargado = x.UsuarioEncargado,
+                 Estatus = x.IdCatEstatusNavigation.Estatus,
+                 UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+                 Cliente = x.IdClienteNavigation.Nombre,
+                 Telefono = x.IdClienteNavigation.Telefono,
+                 RFC = x.IdClienteNavigation.Rfc,
+                 RegimenFiscal = x.IdClienteNavigation.IdRegimenFiscalNavigation.Descripcion,
+                 Correo = x.IdClienteNavigation.Correo,
+                 RazonSocial = x.IdClienteNavigation.RazonSocial,
+                 CodigoPostal = x.IdClienteNavigation.CodigoPostal,
+                 Direccion = x.IdClienteNavigation.Direccion,
+                 CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+                 UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+             }).Where(x => x.Id == Id)
 
-            var reporteServicio = await _context.ReporteServicios
-                .Where(x => x.Id == id)
-                .Select(x => new EditarReporteServicioResponse
+             .FirstAsync();
+
+            // Productos.
+            reporteServicios.Productos = new List<RelSeguimentoProductoResponse>();
+            // Evidencias.
+            reporteServicios.Evidencias = new List<EvidenciaResponse>();
+            // Obtener el primer seguimento.
+            var primerSeguimento = await _context.Seguimentos
+                .Include(x => x.Evidencia)
+                .Include(x => x.RelSeguimentoProductos).ThenInclude(x => x.IdProductoNavigation)
+                .FirstOrDefaultAsync(x => x.IdReporteServicio == reporteServicios.Id);
+
+            if (primerSeguimento != null)
+            {
+                // Llenar Productos.
+                foreach (var item in primerSeguimento.RelSeguimentoProductos)
                 {
-                    Id = x.Id,
-                    IdCatSolicitud = x.IdCatSolicitud,
-                    IdUsuarioCreacion = x.IdUsuarioCreacion,
-                    IdCliente = x.IdCliente,
-                    Titulo = x.Titulo,
-                    Descripcion = x.Descripcion,
-                    FechaCreacion = x.FechaCreacion,
-                    FechaModificacion = x.FechaModificacion,
-                    IdCatEstatus = x.IdCatEstatus,
-                    FechaInicio = x.FechaInicio,
-                    Accesorios = x.Accesorios,
-                    ServicioPreventivo = x.ServicioPreventivo,
-                    ServicioCorrectivo = x.ServicioCorrectivo,
-                    ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = x.IdUsuarioTecnico,
-                    UsuarioEncargado = x.UsuarioEncargado,
-                    // productos = 
-                }).FirstOrDefaultAsync();
+                    reporteServicios.Productos.Add(new RelSeguimentoProductoResponse()
+                    {
+                        Cantidad = item.Cantidad,
+                        FechaCreacion = item.FechaCreacion,
+                        FechaModificacion = item.FechaModificacion,
+                        Id = item.Id,
+                        IdCatEstatus = item.IdCatEstatus,
+                        IdProducto = item.IdProducto,
+                        IdSeguimento = item.IdSeguimento,
+                        IdUsuario = item.IdUsuario,
+                        MontoGasto = item.MontoGasto,
+                        MontoVenta = item.MontoVenta,
+                        Codigo = item.IdProductoNavigation.Codigo,
+                        Producto = item.IdProductoNavigation.Producto1,
+                        Unidad = item.Unidad
+                    });
+                }
 
-            //byte[] pdfBytes = Convert.FromBase64String(ObjModCorreo.archivo);
+                // Llenar Evidencias.
+                foreach (var item in primerSeguimento.Evidencia)
+                {
+                    reporteServicios.Evidencias.Add(new EvidenciaResponse()
+                    {
+                        Extension = item.Extension,
+                        FechaCreacion = item.FechaCreacion,
+                        FechaModificacion = item.FechaModificacion,
+                        Id = item.Id,
+                        IdCatEstatus = item.IdCatEstatus,
+                        IdSeguimento = item.IdSeguimento,
+                        Nombre = item.Nombre,
+                        Ruta = item.Ruta,
+                        Base64 = await _utilidades.ObtenerBase64Async(item.Ruta),
+                    });
+                }
 
-            //string FormatCorreo;
-            //if (ObjModCorreo.isGaleria)
-            //{
-            //    FormatCorreo = "envioEvidenciaGaleria.html";
-            //}
-            //else
-            //{
-            //    FormatCorreo = "envioEvidencia.html";
-            //}
+                // Proxima Visita.
+                reporteServicios.ProximaVisita = primerSeguimento.ProximaVisita;
+                reporteServicios.DescripcionProximaVisita = primerSeguimento.DescripcionProximaVisita;
+            }
+
 
             ClsModResult result = new();
 
@@ -160,24 +220,13 @@ namespace gaco_api.Controllers
 
                 TargetCorreo.strSubject = "Servicio a facturar";
 
-                //TargetCorreo.attachments = new List<ClsModAttachment>
-                //{
-                //    new ClsModAttachment
-                //    {
-                //        FileName = "evidencia.pdf",
-                //        ContentType = "application/pdf",
-                //        FileContent = pdfBytes
-                //    }
-                //};
-
-
                 TargetCorreo.strBody = "Servicio para facturación";
                 TargetCorreo.strPassword = "NotificacionesGACO1";
                 TargetCorreo.intPuerto = 587;
                 TargetCorreo.strHost = "smtp.ionos.com";
                 TargetCorreo.usaSSL = false;
 
-                NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath);
+                NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
             }
             catch (Exception ex)
             {

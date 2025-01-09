@@ -1,4 +1,7 @@
-﻿namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
+﻿using gaco_api.Models.DTOs.Responses.Evidencias;
+using gaco_api.Models.DTOs.Responses.Relaciones;
+
+namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
 {
     public class ReporteServicioResponse
     {
@@ -37,7 +40,18 @@
         public string? Estatus { get; set; }
         public string? UsuarioCreacion { get; set; }
         public string? Cliente { get; set; }
+        public string? Telefono { get; set; }
+        public string? Correo { get; set; }
+        public string? Direccion { get; set; }
+        public string? RFC { get; set; }
+        public string? CodigoPostal { get; set; }
+        public string? RazonSocial { get; set; }
         public string? CatSolicitud { get; set; }
         public string? UsuarioTecnico { get; set; }
+        public DateTime? ProximaVisita { get; set; }
+        public string? DescripcionProximaVisita { get; set; }
+        public string? RegimenFiscal { get; set; }
+        public List<RelSeguimentoProductoResponse>? Productos { get; set; }
+        public List<EvidenciaResponse>? Evidencias { get; set; }
     }
 }
