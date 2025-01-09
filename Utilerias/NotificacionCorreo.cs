@@ -16,7 +16,7 @@ using System.Web;
 using System.IO;
 using System.Net.Mime;
 using DinkToPdf;
-using HtmlAgilityPack;
+
 
 
 namespace gaco_api.Utilerias
