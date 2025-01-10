@@ -11,7 +11,7 @@ public partial class Evidencia
 
     public string Nombre { get; set; } = null!;
 
-    public string Extension { get; set; } = null!;
+    public string? Extension { get; set; }
 
     public string Ruta { get; set; } = null!;
 

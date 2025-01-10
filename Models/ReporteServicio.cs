@@ -33,9 +33,9 @@ public partial class ReporteServicio
 
     public string ObservacionesRecomendaciones { get; set; } = null!;
 
-    public long IdUsuarioTecnico { get; set; }
-
     public string UsuarioEncargado { get; set; } = null!;
+
+    public string? UsuarioTecnico { get; set; }
 
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
@@ -44,8 +44,6 @@ public partial class ReporteServicio
     public virtual Cliente IdClienteNavigation { get; set; } = null!;
 
     public virtual Usuario IdUsuarioCreacionNavigation { get; set; } = null!;
-
-    public virtual Usuario IdUsuarioTecnicoNavigation { get; set; } = null!;
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
 }

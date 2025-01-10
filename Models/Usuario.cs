@@ -35,9 +35,7 @@ public partial class Usuario
 
     public virtual ICollection<RelSeguimentoProducto> RelSeguimentoProductos { get; set; } = new List<RelSeguimentoProducto>();
 
-    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioCreacionNavigations { get; set; } = new List<ReporteServicio>();
-
-    public virtual ICollection<ReporteServicio> ReporteServicioIdUsuarioTecnicoNavigations { get; set; } = new List<ReporteServicio>();
+    public virtual ICollection<ReporteServicio> ReporteServicios { get; set; } = new List<ReporteServicio>();
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
 }

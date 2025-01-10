@@ -6,15 +6,13 @@ namespace gaco_api.Models;
 
 public partial class GacoDbContext : DbContext
 {
-    protected readonly IConfiguration _configuration;
     public GacoDbContext()
     {
     }
 
-    public GacoDbContext(DbContextOptions<GacoDbContext> options, IConfiguration configuration)
+    public GacoDbContext(DbContextOptions<GacoDbContext> options)
         : base(options)
     {
-        _configuration = configuration;
     }
 
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
@@ -48,7 +46,8 @@ public partial class GacoDbContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=dev_gaco_db;Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -332,6 +331,7 @@ public partial class GacoDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.IdCatEstatus).HasDefaultValue(1);
             entity.Property(e => e.Producto1)
                 .HasMaxLength(300)
                 .IsUnicode(false)
@@ -424,6 +424,9 @@ public partial class GacoDbContext : DbContext
             entity.Property(e => e.UsuarioEncargado)
                 .HasMaxLength(300)
                 .IsUnicode(false);
+            entity.Property(e => e.UsuarioTecnico)
+                .HasMaxLength(300)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.IdCatEstatusNavigation).WithMany(p => p.ReporteServicios)
                 .HasForeignKey(d => d.IdCatEstatus)
@@ -440,14 +443,10 @@ public partial class GacoDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReporteServicios_Clientes_Id");
 
-            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany(p => p.ReporteServicioIdUsuarioCreacionNavigations)
+            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany(p => p.ReporteServicios)
                 .HasForeignKey(d => d.IdUsuarioCreacion)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReporteServicios_Usuarios_Id");
-
-            entity.HasOne(d => d.IdUsuarioTecnicoNavigation).WithMany(p => p.ReporteServicioIdUsuarioTecnicoNavigations)
-                .HasForeignKey(d => d.IdUsuarioTecnico)
-                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<Seguimento>(entity =>

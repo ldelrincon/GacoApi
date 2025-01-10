@@ -49,7 +49,7 @@ namespace gaco_api.Controllers
                     || x.IdCatSolicitudNavigation.TipoSolicitud.Contains(request.Busqueda)
                     || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
                     || (x.IdUsuarioCreacionNavigation.Nombres + ' ' + x.IdUsuarioCreacionNavigation.Apellidos).Contains(request.Busqueda)
-                    || (x.IdUsuarioTecnicoNavigation.Nombres + ' ' + x.IdUsuarioTecnicoNavigation.Apellidos).Contains(request.Busqueda)
+                    || x.UsuarioTecnico.Contains(request.Busqueda)
                     || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
                     && x.IdCatEstatus == 1
                 );
@@ -78,13 +78,14 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = x.ServicioPreventivo,
                     ServicioCorrectivo = x.ServicioCorrectivo,
                     ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    // IdUsuarioTecnico = x.IdUsuarioTecnico,
                     UsuarioEncargado = x.UsuarioEncargado,
                     Estatus = x.IdCatEstatusNavigation.Estatus,
                     UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
                     Cliente = x.IdClienteNavigation.Nombre,
                     CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
-                    UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                    //UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                    UsuarioTecnico = x.UsuarioTecnico
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
@@ -132,7 +133,8 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = x.ServicioPreventivo,
                     ServicioCorrectivo = x.ServicioCorrectivo,
                     ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    //IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    UsuarioTecnico = x.UsuarioTecnico ?? string.Empty,
                     UsuarioEncargado = x.UsuarioEncargado,
                     // productos = 
                 }).FirstOrDefaultAsync();
@@ -214,7 +216,8 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = x.ServicioPreventivo,
                     ServicioCorrectivo = x.ServicioCorrectivo,
                     ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    // IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    UsuarioTecnico = x.UsuarioTecnico ?? string.Empty,
                     UsuarioEncargado = x.UsuarioEncargado,
                     // productos = 
                 }).FirstOrDefaultAsync();
@@ -335,10 +338,10 @@ namespace gaco_api.Controllers
                     return Conflict(new DefaultResponse<object> { Message = "El cliente no existe o no se encontró." });
                 }
 
-                if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
-                {
-                    return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
-                }
+                //if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
+                //{
+                //    return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
+                //}
 
                 // Crear el nuevo reporte de servicio
                 var nuevo = new ReporteServicio
@@ -354,7 +357,8 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = request.ServicioPreventivo,
                     ServicioCorrectivo = request.ServicioCorrectivo,
                     ObservacionesRecomendaciones = request.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = request.IdUsuarioTecnico,
+                    // IdUsuarioTecnico = request.IdUsuarioTecnico,
+                    UsuarioTecnico = request.UsuarioTecnico,
                     UsuarioEncargado = request.UsuarioEncargado,
                 };
                 await _context.ReporteServicios.AddAsync(nuevo);
@@ -489,10 +493,10 @@ namespace gaco_api.Controllers
                     return Conflict(new DefaultResponse<object> { Message = "El cliente no existe o no se encontró." });
                 }
 
-                if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
-                {
-                    return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
-                }
+                //if (!await _context.Usuarios.AnyAsync(m => m.Id == request.IdUsuarioTecnico))
+                //{
+                //    return Conflict(new DefaultResponse<object> { Message = "El técnico no existe o no se encontró." });
+                //}
 
                 // Actualizar los datos del reporte
                 reporte.IdCliente = request.IdCliente;
@@ -505,6 +509,7 @@ namespace gaco_api.Controllers
                 reporte.FechaInicio = request.FechaInicio;
                 //reporte.IdUsuarioModificacion = userId;
                 reporte.FechaModificacion = DateTime.UtcNow;
+                reporte.UsuarioTecnico = request.UsuarioTecnico;
 
                 _context.ReporteServicios.Update(reporte);
                 await _context.SaveChangesAsync();
@@ -651,13 +656,14 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = x.ServicioPreventivo,
                     ServicioCorrectivo = x.ServicioCorrectivo,
                     ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    IdUsuarioTecnico = x.IdUsuarioTecnico,
+                    // IdUsuarioTecnico = x.IdUsuarioTecnico,
                     UsuarioEncargado = x.UsuarioEncargado,
                     Estatus = x.IdCatEstatusNavigation.Estatus,
                     UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
                     Cliente = x.IdClienteNavigation.Nombre,
                     CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
-                    UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                    // UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                    UsuarioTecnico = x.UsuarioTecnico,
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
