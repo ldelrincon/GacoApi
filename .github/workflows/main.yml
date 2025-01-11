@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Eliminar Este
 on:
   workflow_dispatch:
 
