@@ -136,7 +136,7 @@ namespace gaco_api.Controllers
                  ServicioPreventivo = x.ServicioPreventivo,
                  ServicioCorrectivo = x.ServicioCorrectivo,
                  ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                 IdUsuarioTecnico = x.IdUsuarioTecnico,
+                 UsuarioTecnico = x.UsuarioTecnico,
                  UsuarioEncargado = x.UsuarioEncargado,
                  Estatus = x.IdCatEstatusNavigation.Estatus,
                  UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
@@ -149,7 +149,6 @@ namespace gaco_api.Controllers
                  CodigoPostal = x.IdClienteNavigation.CodigoPostal,
                  Direccion = x.IdClienteNavigation.Direccion,
                  CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
-                 UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
              }).Where(x => x.Id == Id)
 
              .FirstAsync();

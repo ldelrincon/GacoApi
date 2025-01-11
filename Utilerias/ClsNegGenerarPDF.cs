@@ -12,6 +12,7 @@ namespace ClbNegGestores
 {
     public class ClsNegGenerarPDF
     {
+     
         public static string ExportPDFPlantillaSolicitudInvestigacion(string Folio, string Path)
         {
             HtmlDocument doc = new HtmlDocument();
@@ -115,7 +116,16 @@ namespace ClbNegGestores
             string base64 = "";
             try
             {
-                
+                //saca los montos para factura
+                decimal? SubTotal = 0, Iva = 0, Total = 0, IvaAplicado = 0;
+                foreach (var objProductos in objReporteServicioResponse.Productos)
+                {
+                    SubTotal += (objProductos.Cantidad * objProductos.MontoGasto);
+                }
+                Iva = SubTotal * .16m;
+                Total = SubTotal + Iva;
+
+
                 string RutaCorreosNezterLoanding = srcImage;
                 doc2.Load(Path);
                 string strPreventivo="No", strCorrectivo="No";
@@ -141,11 +151,15 @@ namespace ClbNegGestores
                 doc2.GetElementbyId("TrabajoRealizado").InnerHtml = objReporteServicioResponse.Descripcion;
                 doc2.GetElementbyId("Observaciones").InnerHtml = objReporteServicioResponse.ObservacionesRecomendaciones;
                 doc2.GetElementbyId("EncargadoArea").InnerHtml = objReporteServicioResponse.UsuarioEncargado;
-                doc2.GetElementbyId("TecnicoEncargado").InnerHtml = objReporteServicioResponse.UsuarioTecnico;
+                doc2.GetElementbyId("TecnicoEncargado").InnerHtml = objReporteServicioResponse.UsuarioTecnico ?? "sin asignar";
                 doc2.GetElementbyId("FechaVisita").InnerHtml = objReporteServicioResponse.ProximaVisita.ToString();
                 doc2.GetElementbyId("DescripcionVisita").InnerHtml = objReporteServicioResponse.DescripcionProximaVisita;
                 doc2.GetElementbyId("RegimenFiscal").InnerHtml = objReporteServicioResponse.RegimenFiscal;
                 doc2.GetElementbyId("Productos").InnerHtml = strTablaProductos;
+
+                doc2.GetElementbyId("SubTotal").InnerHtml = SubTotal?.ToString("C2");
+                doc2.GetElementbyId("Iva").InnerHtml = Iva?.ToString("C2");
+                doc2.GetElementbyId("Total").InnerHtml = Total?.ToString("C2");
 
 
                 doc2.GetElementbyId("RutaCorreosNezterLoanding").SetAttributeValue("src", RutaCorreosNezterLoanding);
@@ -164,6 +178,7 @@ namespace ClbNegGestores
         static string GenerarTablaHtml(ReporteServicioResponse objReporteServicioResponse)
         {
             var sb = new StringBuilder();
+           
 
             sb.AppendLine("<table border=\"1\">");
             sb.AppendLine("  <thead>");
@@ -171,6 +186,7 @@ namespace ClbNegGestores
             //sb.AppendLine("      <th>ID</th>");
             sb.AppendLine("      <th>Producto</th>");
             sb.AppendLine("      <th>Cantidad</th>");
+            sb.AppendLine("      <th>Precio</th>");
             sb.AppendLine("    </tr>");
             sb.AppendLine("  </thead>");
             sb.AppendLine("  <tbody>");
@@ -180,12 +196,15 @@ namespace ClbNegGestores
                 sb.AppendLine("    <tr>");
                 sb.AppendLine($"      <td>{objProductos.Producto}</td>");
                 sb.AppendLine($"      <td>{objProductos.Cantidad}</td>");
+                sb.AppendLine($"      <td>{objProductos.MontoGasto?.ToString("C2")}</td>");
                 //sb.AppendLine($"      <td>{persona.Edad}</td>");
                 sb.AppendLine("    </tr>");
             }
+            
 
             sb.AppendLine("  </tbody>");
             sb.AppendLine("</table>");
+
 
             return sb.ToString();
         }

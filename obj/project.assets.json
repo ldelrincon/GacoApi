@@ -688,15 +688,13 @@
           }
         }
       },
-      "LibWkHtmlToX-32/0.12.6.1": {
+      "libwkhtmltox-64/1.0.0": {
         "type": "package",
-        "contentFiles": {
-          "contentFiles/any/any/libwkhtmltox.dll": {
-            "buildAction": "None",
-            "codeLanguage": "any",
-            "copyToOutput": true,
-            "outputPath": "libwkhtmltox.dll"
-          }
+        "compile": {
+          "lib/libwkhtmltox.dll": {}
+        },
+        "runtime": {
+          "lib/libwkhtmltox.dll": {}
         }
       },
       "MailKit/4.9.0": {
@@ -4882,16 +4880,16 @@
         "logo.png"
       ]
     },
-    "LibWkHtmlToX-32/0.12.6.1": {
-      "sha512": "c/cZYKXSsv6IqUxk6ko/nj2paoK2aNcwpxmIAuylTH5kLJ2RbowMGZrbQbu7dFVglAa8f+k8rodrdXEMSvw2zA==",
+    "libwkhtmltox-64/1.0.0": {
+      "sha512": "aM2JorirGonmQG3Dy9gIQaub7ajZlZdQ2dX4ZC7D/2Cb8BYJg6mfCLyMcIpe3eaksUG6/9TJ3hxiHnzx6G+ISg==",
       "type": "package",
-      "path": "libwkhtmltox-32/0.12.6.1",
+      "path": "libwkhtmltox-64/1.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "contentFiles/any/any/libwkhtmltox.dll",
-        "libwkhtmltox-32.0.12.6.1.nupkg.sha512",
-        "libwkhtmltox-32.nuspec"
+        "lib/libwkhtmltox.dll",
+        "libwkhtmltox-64.1.0.0.nupkg.sha512",
+        "libwkhtmltox-64.nuspec"
       ]
     },
     "MailKit/4.9.0": {
@@ -12302,7 +12300,6 @@
     "net8.0": [
       "DinkToPdf >= 1.0.8",
       "HtmlAgilityPack >= 1.11.72",
-      "LibWkHtmlToX-32 >= 0.12.6.1",
       "MailKit >= 4.9.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.10",
       "Microsoft.EntityFrameworkCore >= 8.0.10",
@@ -12311,28 +12308,24 @@
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 8.0.6",
       "MimeKit >= 4.9.0",
       "Swashbuckle.AspNetCore >= 6.6.2",
-      "System.IdentityModel.Tokens.Jwt >= 8.1.2"
+      "System.IdentityModel.Tokens.Jwt >= 8.1.2",
+      "libwkhtmltox-64 >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\arbal\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
+      "projectUniqueName": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
       "projectName": "gaco_api",
-      "projectPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
-      "packagesPath": "C:\\Users\\arbal\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\obj\\",
+      "projectPath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
+      "packagesPath": "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\",
+      "outputPath": "C:\\ProyectoLuis\\GacoApi\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\arbal\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\LuisOctavioDelRincón\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -12340,7 +12333,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -12371,10 +12363,6 @@
           "HtmlAgilityPack": {
             "target": "Package",
             "version": "[1.11.72, )"
-          },
-          "LibWkHtmlToX-32": {
-            "target": "Package",
-            "version": "[0.12.6.1, )"
           },
           "MailKit": {
             "target": "Package",
@@ -12413,6 +12401,10 @@
           "System.IdentityModel.Tokens.Jwt": {
             "target": "Package",
             "version": "[8.1.2, )"
+          },
+          "libwkhtmltox-64": {
+            "target": "Package",
+            "version": "[1.0.0, )"
           }
         },
         "imports": [
@@ -12437,5 +12429,17 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "El paquete \"libwkhtmltox-64 1.0.0\" se restauró con \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\" en lugar de la plataforma de destino del proyecto \"net8.0\". Puede que el paquete no sea totalmente compatible con el proyecto.",
+      "libraryId": "libwkhtmltox-64",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }
