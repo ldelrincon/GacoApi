@@ -1,4 +1,4 @@
-name: Eliminar Este
+name: Deploy to Server
 on:
   workflow_dispatch:
 
@@ -20,8 +20,8 @@ jobs:
       # Paso 3: Restaurar dependencias y compilar
       - name: Restore and build
         run: |
-          dotnet restore
-          dotnet publish -c Release -r linux-x64 --self-contained -o ./publish
+          dotnet restore --force
+          dotnet publish -c Release -r linux-x64 --no-restore --self-contained -o ./publish
 
       # Paso 4: Instalar Cloudflare WARP (si es necesario para conectarte al servidor)
       - name: Install Cloudflare WARP
