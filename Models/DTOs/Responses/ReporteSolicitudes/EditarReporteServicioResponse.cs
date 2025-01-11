@@ -19,7 +19,8 @@ namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
         public bool ServicioPreventivo { get; set; }
         public bool ServicioCorrectivo { get; set; }
         public string ObservacionesRecomendaciones { get; set; } = null!;
-        public long IdUsuarioTecnico { get; set; }
+        //public long IdUsuarioTecnico { get; set; }
+        public string UsuarioTecnico { get; set; }
         public string UsuarioEncargado { get; set; } = null!;
 
         public List<RelSeguimentoProductoResponse>? Productos { get; set; }

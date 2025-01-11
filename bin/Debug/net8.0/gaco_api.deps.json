@@ -18,7 +18,6 @@
           "Microsoft.EntityFrameworkCore.Tools": "8.0.10",
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": "8.0.6",
           "MimeKit": "4.9.0",
-          "OpenHtmlToPdf": "1.12.0",
           "Swashbuckle.AspNetCore": "6.6.2",
           "System.IdentityModel.Tokens.Jwt": "8.1.2"
         },
@@ -1776,14 +1775,6 @@
           "lib/netstandard2.0/NuGet.Versioning.dll": {
             "assemblyVersion": "6.11.0.119",
             "fileVersion": "6.11.0.119"
-          }
-        }
-      },
-      "OpenHtmlToPdf/1.12.0": {
-        "runtime": {
-          "lib/net45/OpenHtmlToPdf.dll": {
-            "assemblyVersion": "1.12.0.0",
-            "fileVersion": "1.12.0.0"
           }
         }
       },
@@ -3578,13 +3569,6 @@
       "sha512": "sha512-v/GGlIj2dd7svplFmASWEueu62veKW0MrMtBaZ7QG8aJTSGv2yE+pgUGhXRcQ4nxNOEq/wLBrz1vkth/1SND7A==",
       "path": "nuget.versioning/6.11.0",
       "hashPath": "nuget.versioning.6.11.0.nupkg.sha512"
-    },
-    "OpenHtmlToPdf/1.12.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-DMMyVfsJN4RKS/HdZu3isdDhVE5VMhphVZikTw6qCFWZUuq32kS4JSR34MggIwAaw0dOTtmJRj9iVhqitEidDg==",
-      "path": "openhtmltopdf/1.12.0",
-      "hashPath": "openhtmltopdf.1.12.0.nupkg.sha512"
     },
     "runtime.native.System/4.0.0": {
       "type": "package",

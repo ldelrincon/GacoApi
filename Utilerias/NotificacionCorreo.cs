@@ -17,7 +17,6 @@ using System.IO;
 using System.Net.Mime;
 using DinkToPdf;
 using HtmlAgilityPack;
-using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
 
 
 namespace gaco_api.Utilerias

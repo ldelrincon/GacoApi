@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj": {}
+    "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj": {}
   },
   "projects": {
-    "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj": {
+    "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
+        "projectUniqueName": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
         "projectName": "gaco_api",
-        "projectPath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
-        "packagesPath": "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\",
-        "outputPath": "C:\\ProyectoLuis\\GacoApi\\obj\\",
+        "projectPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
+        "packagesPath": "C:\\Users\\arbal\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\LuisOctavioDelRincón\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\arbal\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -86,10 +91,6 @@
             "MimeKit": {
               "target": "Package",
               "version": "[4.9.0, )"
-            },
-            "OpenHtmlToPdf": {
-              "target": "Package",
-              "version": "[1.12.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

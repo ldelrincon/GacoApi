@@ -7,7 +7,7 @@ using HtmlAgilityPack;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Html;
 using MimeKit;
-using OpenHtmlToPdf;
+
 namespace ClbNegGestores
 {
     public class ClsNegGenerarPDF

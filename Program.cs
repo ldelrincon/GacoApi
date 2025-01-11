@@ -14,6 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// builder.WebHost.UseUrls("http://localhost:7002", "https://localhost:7001");
+
 builder.Services.AddDbContext<GacoDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -62,7 +64,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Introduce el token JWT de esta manera: Bearer {token}"
+        Description = "Introduce el token JWT de esta manera: Bearer {token}",
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
