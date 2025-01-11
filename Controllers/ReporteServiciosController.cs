@@ -398,10 +398,12 @@ namespace gaco_api.Controllers
                         {
                             IdSeguimento = primerSeguimiento.Id,
                             IdProducto = producto.Id,
+                            MontoGasto = producto.MontoGasto,
                             IdUsuario = userId,
                             IdCatEstatus = 1,
                             Cantidad = producto.Cantidad,
                             Unidad = "",
+                            MontoVenta = (producto.Cantidad * producto.MontoGasto)
                         };
                         await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProducto);
                         await _context.SaveChangesAsync();
@@ -541,12 +543,20 @@ namespace gaco_api.Controllers
 
                         var nuevoProducto = new RelSeguimentoProducto
                         {
+                            //IdSeguimento = seguimiento.Id,
+                            //IdProducto = producto.Id,
+                            //IdUsuario = userId,
+                            //IdCatEstatus = 1,
+                            //Cantidad = producto.Cantidad,
+                            //Unidad = "",
                             IdSeguimento = seguimiento.Id,
                             IdProducto = producto.Id,
+                            MontoGasto = producto.MontoGasto,
                             IdUsuario = userId,
                             IdCatEstatus = 1,
                             Cantidad = producto.Cantidad,
                             Unidad = "",
+                            MontoVenta = (producto.Cantidad * producto.MontoGasto)
                         };
 
                         await _context.RelSeguimentoProductos.AddAsync(nuevoProducto);
