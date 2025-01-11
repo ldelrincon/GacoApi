@@ -87,9 +87,17 @@
               "target": "Package",
               "version": "[6.6.2, )"
             },
+            "System.IO.FileSystem": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
               "version": "[8.1.2, )"
+            },
+            "System.Net.Primitives": {
+              "target": "Package",
+              "version": "[4.3.1, )"
             },
             "libwkhtmltox-64": {
               "target": "Package",
