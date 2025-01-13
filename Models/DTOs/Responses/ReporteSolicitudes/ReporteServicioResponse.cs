@@ -53,5 +53,8 @@ namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
         public string? RegimenFiscal { get; set; }
         public List<RelSeguimentoProductoResponse>? Productos { get; set; }
         public List<EvidenciaResponse>? Evidencias { get; set; }
+        public decimal? Total { get; set; }
+
+        public string? Totalstr { get; set; }
     }
 }

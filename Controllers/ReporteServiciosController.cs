@@ -60,6 +60,8 @@ namespace gaco_api.Controllers
             {
                 request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
             }
+            // Productos.
+          
 
             // Seleccionar y aplicar paginación
             var reporteServicios = await query
@@ -86,11 +88,32 @@ namespace gaco_api.Controllers
                     Cliente = x.IdClienteNavigation.Nombre,
                     CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
                     //UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
-                    UsuarioTecnico = x.UsuarioTecnico
+                    UsuarioTecnico = x.UsuarioTecnico,
+                    
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
                 .ToListAsync();
+
+            foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+            {
+                //primer seguimiento
+                var primerSeguimento = await _context.Seguimentos
+                 .Include(x => x.Evidencia)
+                 .Include(x => x.RelSeguimentoProductos).ThenInclude(x => x.IdProductoNavigation)
+                 .FirstOrDefaultAsync(x => x.IdReporteServicio == objReporteServicioResponse.Id);
+                 
+                objReporteServicioResponse.Total = 0;
+                foreach (var item in primerSeguimento.RelSeguimentoProductos)
+                {
+                    objReporteServicioResponse.Total += (item.Cantidad * item.MontoGasto);
+                }
+                objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                if (objReporteServicioResponse.Totalstr == null)
+                {
+                    objReporteServicioResponse.Totalstr = "$0.00";
+                }
+            }
 
             // Crear la respuesta
             var response = new DefaultResponse<List<ReporteServicioResponse>>
