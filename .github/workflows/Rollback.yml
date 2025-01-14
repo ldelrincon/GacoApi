@@ -1,0 +1,64 @@
+name: Rollback to Last Backup
+on:
+  workflow_dispatch:
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies (Cloudflare WARP, sshpass, rar)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass rar
+          curl https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update && sudo apt-get install -y cloudflare-warp
+
+      - name: Connect Cloudflare WARP
+        run: |
+          script -q -c "warp-cli --accept-tos connector new 'eyJhIjoiOTVhYTFkODk1NjExODc5MmQ0MjY2YTJlZGU1MTBjZDgiLCJ0IjoiMzU1YWJmZDQtNTA4Ni00MTliLWEwMTYtZDhkYThiODA3MjVkIiwicyI6InVxS25lQmwyeGpVbFgrbkRnRmRTdzltU0FML0hXQXBHUm8vQ1BmVGNzT0V0K2dpUXIxZ0hKaFljVXhXUk5vaHd0anQwQkJTR2FWNlM0bXBtVURIK0ZnPT0ifQ=='"
+          script -q -c "warp-cli --accept-tos registration show"
+          script -q -c "warp-cli --accept-tos connect"
+          sleep 15
+          script -q -c "warp-cli --accept-tos status"
+
+      - name: Restore last backup
+        env:
+          SSH_USERNAME: root
+          SSH_PASSWORD: v50llDtK
+          SERVER_IP: 69.48.202.76
+        run: |
+          BACKUP_PATH="/home/Respaldos/API"
+          DEPLOY_PATH="/var/www/html/api"
+
+          echo "Fetching latest backup..."
+          LATEST_BACKUP=$(sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "ls -Art $BACKUP_PATH | grep '.rar' | tail -n 1")
+          
+          if [ -z "$LATEST_BACKUP" ]; then
+            echo "No backups found in $BACKUP_PATH. Rollback aborted."
+            exit 1
+          fi
+
+          echo "Latest backup found: $LATEST_BACKUP"
+
+          echo "Stopping GacoApi service..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
+
+          echo "Cleaning deployment path..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rm -rf $DEPLOY_PATH/*"
+
+          echo "Extracting backup..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "unrar x $BACKUP_PATH/$LATEST_BACKUP $DEPLOY_PATH"
+
+          echo "Starting GacoApi service..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl start GacoApi"
+
+      - name: Verify API service status
+        env:
+          SSH_USERNAME: root
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          SERVER_IP: 69.48.202.76
+        run: |
+          echo "Checking service status..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl status GacoApi"
