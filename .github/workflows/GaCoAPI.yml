@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo apt-get install -y sshpass rar
           BACKUP_PATH="/home/Respaldos/API"
-          BACKUP_FILE="$(date +%d-%m-%Y).rar"
+          BACKUP_FILE="$(date +%d-%m-%Y_%H-%M).rar"
 
           echo "Creating backup of current deployment..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rar a $BACKUP_PATH/$BACKUP_FILE /var/www/html/api"
