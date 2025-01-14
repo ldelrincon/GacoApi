@@ -48,7 +48,7 @@ jobs:
           sleep 15
           script -q -c "warp-cli --accept-tos status"
 
-      # Paso 7: Instalar sshpass y copiar archivos al servidor remoto
+      # Paso 7: Instalar sshpass, realizar el respaldo, y gestionar respaldos antiguos
       - name: Deploy to server
         env:
           SSH_USERNAME: root
@@ -58,9 +58,21 @@ jobs:
           sudo apt-get install -y sshpass rar
           BACKUP_PATH="/home/Respaldos/API"
           BACKUP_FILE="$(date +%d-%m-%Y).rar"
+
+          echo "Creating backup of current deployment..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rar a $BACKUP_PATH/$BACKUP_FILE /var/www/html/api"
+
+          echo "Cleaning old backups, keeping the last 3..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" \
+            "ls -1t $BACKUP_PATH/*.rar | tail -n +4 | xargs -d '\n' rm -f || true"
+
+          echo "Stopping GacoApi service..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
+
+          echo "Deploying new files..."
           sshpass -p "$SSH_PASSWORD" rsync -avz ./publish/ "$SSH_USERNAME@$SERVER_IP:/var/www/html/api/"
+
+          echo "Starting GacoApi service..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl start GacoApi"
 
       # Paso 8: Verificar el estado del servicio (opcional)
