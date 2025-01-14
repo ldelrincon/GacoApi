@@ -55,7 +55,10 @@ jobs:
           SSH_PASSWORD: v50llDtK
           SERVER_IP: 69.48.202.76
         run: |
-          sudo apt-get install -y sshpass
+          sudo apt-get install -y sshpass rar
+          BACKUP_PATH="/home/Respaldos/API"
+          BACKUP_FILE="$(date +%d-%m-%Y).rar"
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rar a $BACKUP_PATH/$BACKUP_FILE /var/www/html/api"
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
           sshpass -p "$SSH_PASSWORD" rsync -avz ./publish/ "$SSH_USERNAME@$SERVER_IP:/var/www/html/api/"
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl start GacoApi"
