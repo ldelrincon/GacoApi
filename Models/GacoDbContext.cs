@@ -47,7 +47,7 @@ public partial class GacoDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=dev_gaco_db;Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=gaco_db;Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
