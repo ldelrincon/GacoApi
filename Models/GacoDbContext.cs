@@ -49,6 +49,7 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
 

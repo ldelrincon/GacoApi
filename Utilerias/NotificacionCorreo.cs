@@ -16,7 +16,8 @@ using System.Web;
 using System.IO;
 using System.Net.Mime;
 using DinkToPdf;
-
+using HtmlAgilityPack;
+using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
 
 
 namespace gaco_api.Utilerias
@@ -90,13 +91,13 @@ namespace gaco_api.Utilerias
         }
 
 
-        public static void Send(ClsModCorreo Correo, string ContentRootPath)
+        public static void Send(ClsModCorreo Correo, string ContentRootPath, ReporteServicioResponse objReporteServicioResponse)
         {
             // Crear un documento HTML que luego convertiremos a PDF
             var PathPlantilla = Path.Combine(ContentRootPath, "Files", "solicitudInvestigacion.html");
             var srcImage = Path.Combine(ContentRootPath, "Image", "Gaco.jpeg");
             ClsNegGenerarPDF objNegGenerarPDF = new ClsNegGenerarPDF();
-            string strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionpdf("Pruebas luis", PathPlantilla, srcImage);
+            string strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionpdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
             //var htmlContent = "<h1>Este es un correo con un archivo adjunto</h1><p>Este archivo es un PDF generado a partir de HTML.</p>";
             var htmlContent = strTexto;
 
@@ -119,14 +120,14 @@ namespace gaco_api.Utilerias
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
             message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
-            message.Subject = "Correo con archivo adjunto";
+            message.Subject = "Seguimiento para facturación de cliente: "+ objReporteServicioResponse.Cliente;
 
             // Crear el cuerpo del mensaje en formato HTML
             var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
 
             // Adjuntar el archivo PDF
             //bodyBuilder.Attachments.Add(filePath);
-            bodyBuilder.Attachments.Add(fileName: "Archivo_1.pdf",
+            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
                             data: pdf,
                             contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
 
