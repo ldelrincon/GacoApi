@@ -1,6 +1,7 @@
 ﻿using gaco_api.Customs;
 using gaco_api.Models;
 using gaco_api.Models.DTOs.Requests;
+using gaco_api.Models.DTOs.Requests.Clientes;
 using gaco_api.Models.DTOs.Requests.ReporteSolicitudes;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Evidencias;
@@ -322,7 +323,8 @@ namespace gaco_api.Controllers
                             MontoVenta = item.MontoVenta,
                             Codigo = item.IdProductoNavigation.Codigo,
                             Producto = item.IdProductoNavigation.Producto1, 
-                            Unidad = item.Unidad
+                            Unidad = item.Unidad, 
+                            Porcentaje = item.Porcentaje,
                         });
                     }
 
@@ -473,6 +475,7 @@ namespace gaco_api.Controllers
                             IdCatEstatus = 1,
                             Cantidad = producto.Cantidad,
                             Unidad = "",
+                            Porcentaje = producto.Porcentaje,
                             MontoVenta = (producto.Cantidad * producto.MontoGasto)
                         };
                         await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProducto);
@@ -626,6 +629,7 @@ namespace gaco_api.Controllers
                             IdCatEstatus = 1,
                             Cantidad = producto.Cantidad,
                             Unidad = "",
+                            Porcentaje = producto.Porcentaje,
                             MontoVenta = (producto.Cantidad * producto.MontoGasto)
                         };
 
@@ -708,9 +712,9 @@ namespace gaco_api.Controllers
                 .AsQueryable();
 
             query = query.Where(
-                x => x.IdCatSolicitud == 1 && 
-                x.IdCatEstatus == 3 && 
-                x.IdUsuarioCreacion == userId
+                x => x.IdCatSolicitud == 1 
+                && x.IdCatEstatus == 3 
+                // && x.IdUsuarioCreacion == userId
             );
 
             if (request.CantidadPorPagina == -1)
@@ -757,6 +761,44 @@ namespace gaco_api.Controllers
             };
 
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("CambiarEstatusEnSeguimento")]
+        public async Task<ActionResult> CambiarEstatus(CambiarEstatusEnSeguimentoRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                var reporte = await _context.ReporteServicios.FirstOrDefaultAsync(r => r.Id == request.Id);
+                if (reporte == null)
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "El reporte no existe o no se encontró." });
+                }
+
+                // Actualizar los datos
+                reporte.IdCatEstatus = 3;
+                reporte.FechaInicio = reporte.FechaInicio ?? DateTime.Now;
+
+                // Guardar los cambios
+                _context.ReporteServicios.Update(reporte);
+                await _context.SaveChangesAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Reporte actualizado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
         }
     }
 }

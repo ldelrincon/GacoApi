@@ -26,5 +26,6 @@
 
         public string? Codigo { get; set; }
         public string? Producto { get; set; }
+        public decimal? Porcentaje { get; set; }
     }
 }

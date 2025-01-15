@@ -140,7 +140,8 @@ namespace gaco_api.Customs
 
             if (!File.Exists(rutaArchivo))
             {
-                throw new FileNotFoundException("El archivo especificado no existe.", rutaArchivo);
+                // throw new FileNotFoundException("El archivo especificado no existe.", rutaArchivo);
+                return string.Empty;
             }
 
             try
