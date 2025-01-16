@@ -18,5 +18,7 @@
 
         public int IdCatEstatus { get; set; }
         public string? Base64 { get; set; }
+
+        public decimal? Size { get; set; }
     }
 }

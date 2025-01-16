@@ -39,91 +39,103 @@ namespace gaco_api.Controllers
         [Route("Busqueda")]
         public async Task<IActionResult> BusquedaReporteSolicitud(BusquedaReporteServicioRequest request)
         {
-            // Construir la consulta inicial
-            var query = _context.ReporteServicios
-                .Include(x => x.IdCatEstatusNavigation)
-                .AsQueryable();
-
-            // Filtrar si hay una búsqueda
-            if (!string.IsNullOrEmpty(request.Busqueda))
+            try
             {
-                query = query.Where(x => x.UsuarioEncargado.Contains(request.Busqueda)
-                    || x.IdCatSolicitudNavigation.TipoSolicitud.Contains(request.Busqueda)
-                    || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
-                    || (x.IdUsuarioCreacionNavigation.Nombres + ' ' + x.IdUsuarioCreacionNavigation.Apellidos).Contains(request.Busqueda)
-                    || x.UsuarioTecnico.Contains(request.Busqueda)
-                    || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
-                    && x.IdCatEstatus == 1
-                );
-            }
+                // Construir la consulta inicial
+                var query = _context.ReporteServicios
+                    .Include(x => x.IdCatEstatusNavigation)
+                    .AsQueryable();
 
-            if (request.CantidadPorPagina == -1)
-            {
-                request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
-            }
-            // Productos.
-          
-
-            // Seleccionar y aplicar paginación
-            var reporteServicios = await query
-                .Select(x => new ReporteServicioResponse
+                // Filtrar si hay una búsqueda
+                if (!string.IsNullOrEmpty(request.Busqueda))
                 {
-                    Id = x.Id,
-                    IdCatSolicitud = x.IdCatSolicitud,
-                    IdUsuarioCreacion = x.IdUsuarioCreacion,
-                    IdCliente = x.IdCliente,
-                    Titulo = x.Titulo,
-                    Descripcion = x.Descripcion,
-                    FechaCreacion = x.FechaCreacion,
-                    FechaModificacion = x.FechaModificacion,
-                    IdCatEstatus = x.IdCatEstatus,
-                    FechaInicio = x.FechaInicio,
-                    Accesorios = x.Accesorios,
-                    ServicioPreventivo = x.ServicioPreventivo,
-                    ServicioCorrectivo = x.ServicioCorrectivo,
-                    ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    // IdUsuarioTecnico = x.IdUsuarioTecnico,
-                    UsuarioEncargado = x.UsuarioEncargado,
-                    Estatus = x.IdCatEstatusNavigation.Estatus,
-                    UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
-                    Cliente = x.IdClienteNavigation.Nombre,
-                    CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
-                    //UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
-                    UsuarioTecnico = x.UsuarioTecnico,
-                    
-                })
-                .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
-                .Take(request.CantidadPorPagina)
-                .ToListAsync();
-
-            foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
-            {
-                //primer seguimiento
-                var primerSeguimento = await _context.Seguimentos
-                 .Include(x => x.Evidencia)
-                 .Include(x => x.RelSeguimentoProductos).ThenInclude(x => x.IdProductoNavigation)
-                 .FirstOrDefaultAsync(x => x.IdReporteServicio == objReporteServicioResponse.Id);
-                 
-                objReporteServicioResponse.Total = 0;
-                foreach (var item in primerSeguimento.RelSeguimentoProductos)
-                {
-                    objReporteServicioResponse.Total += (item.Cantidad * item.MontoGasto);
+                    query = query.Where(x => x.UsuarioEncargado.Contains(request.Busqueda)
+                        || x.IdCatSolicitudNavigation.TipoSolicitud.Contains(request.Busqueda)
+                        || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
+                        || (x.IdUsuarioCreacionNavigation.Nombres + ' ' + x.IdUsuarioCreacionNavigation.Apellidos).Contains(request.Busqueda)
+                        || x.UsuarioTecnico.Contains(request.Busqueda)
+                        || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
+                        && x.IdCatEstatus == 1
+                    );
                 }
-                objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
-                if (objReporteServicioResponse.Totalstr == null)
+
+                if (request.CantidadPorPagina == -1)
                 {
-                    objReporteServicioResponse.Totalstr = "$0.00";
+                    request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
                 }
+                // Productos.
+
+
+                // Seleccionar y aplicar paginación
+                var reporteServicios = await query
+                    .Select(x => new ReporteServicioResponse
+                    {
+                        Id = x.Id,
+                        IdCatSolicitud = x.IdCatSolicitud,
+                        IdUsuarioCreacion = x.IdUsuarioCreacion,
+                        IdCliente = x.IdCliente,
+                        Titulo = x.Titulo,
+                        Descripcion = x.Descripcion,
+                        FechaCreacion = x.FechaCreacion,
+                        FechaModificacion = x.FechaModificacion,
+                        IdCatEstatus = x.IdCatEstatus,
+                        FechaInicio = x.FechaInicio,
+                        Accesorios = x.Accesorios,
+                        ServicioPreventivo = x.ServicioPreventivo,
+                        ServicioCorrectivo = x.ServicioCorrectivo,
+                        ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                        // IdUsuarioTecnico = x.IdUsuarioTecnico,
+                        UsuarioEncargado = x.UsuarioEncargado,
+                        Estatus = x.IdCatEstatusNavigation.Estatus,
+                        UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+                        Cliente = x.IdClienteNavigation.Nombre,
+                        CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+                        //UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                        UsuarioTecnico = x.UsuarioTecnico,
+
+                    })
+                    .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+                    .Take(request.CantidadPorPagina)
+                    .ToListAsync();
+
+                foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+                {
+                    //primer seguimiento
+                    var primerSeguimento = await _context.Seguimentos
+                     .Include(x => x.Evidencia)
+                     .Include(x => x.RelSeguimentoProductos)
+                     .ThenInclude(x => x.IdProductoNavigation)
+                     .FirstOrDefaultAsync(x => x.IdReporteServicio == objReporteServicioResponse.Id);
+
+                    objReporteServicioResponse.Total = 0;
+                    foreach (var item in primerSeguimento.RelSeguimentoProductos)
+                    {
+                        objReporteServicioResponse.Total += (item.Cantidad * item.MontoGasto);
+                    }
+                    objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                    if (objReporteServicioResponse.Totalstr == null)
+                    {
+                        objReporteServicioResponse.Totalstr = "$0.00";
+                    }
+                }
+
+                // Crear la respuesta
+                var response = new DefaultResponse<List<ReporteServicioResponse>>
+                {
+                    Success = true,
+                    Data = reporteServicios,
+                };
+
+                return Ok(response);
             }
-
-            // Crear la respuesta
-            var response = new DefaultResponse<List<ReporteServicioResponse>>
+            catch (Exception ex)
             {
-                Success = true,
-                Data = reporteServicios,
-            };
-
-            return Ok(response);
+                return Ok(new DefaultResponse<List<ReporteServicioResponse>>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                });
+            }
         }
 
         /// <summary>
@@ -222,7 +234,7 @@ namespace gaco_api.Controllers
                         IdCatEstatus = item.IdCatEstatus,
                         IdSeguimento = item.IdSeguimento,
                         Nombre = item.Nombre,
-                        Ruta = item.Ruta,
+                        Ruta = _utilidades.GetFullUrl(item.Ruta),
                         Base64 = await _utilidades.ObtenerBase64Async(item.Ruta),
                     });
                 }
@@ -331,6 +343,8 @@ namespace gaco_api.Controllers
                     // Llenar Evidencias.
                     foreach (var item in primerSeguimento.Evidencia)
                     {
+                        
+                        var base64String = await _utilidades.ObtenerBase64Async(_utilidades.GetPhysicalPath(item.Ruta));
                         reporteServicio.Evidencias.Add(new EvidenciaResponse()
                         {
                             Extension = item.Extension,
@@ -340,8 +354,9 @@ namespace gaco_api.Controllers
                             IdCatEstatus = item.IdCatEstatus,
                             IdSeguimento = item.IdSeguimento,
                             Nombre = item.Nombre,
-                            Ruta = item.Ruta,
-                            Base64 = await _utilidades.ObtenerBase64Async(item.Ruta),
+                            Ruta = _utilidades.GetFullUrl(item.Ruta),
+                            Base64 = base64String,
+                            Size = _utilidades.GetBase64SizeInKB(base64String)
                         });
                     }
 
@@ -492,7 +507,7 @@ namespace gaco_api.Controllers
                         try
                         {
                             rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
-                                $"Evidencias/Seguimento_{primerSeguimiento.Id}", 
+                                $"/Evidencias/Seguimento_{primerSeguimiento.Id}", 
                                 evidenciaRS.Extension, 
                                 evidenciaRS.Base64
                             );
@@ -654,7 +669,7 @@ namespace gaco_api.Controllers
                         try
                         {
                             rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
-                                $"Evidencias/Seguimento_{seguimiento!.Id}",
+                                $"/Evidencias/Seguimento_{seguimiento!.Id}",
                                 evidenciaRS.Extension,
                                 evidenciaRS.Base64
                             );
