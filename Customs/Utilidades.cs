@@ -12,12 +12,14 @@ namespace gaco_api.Customs
     public class Utilidades
     {
         private readonly IConfiguration _configuration;
-        // private readonly IHttpContextAccessor _httpContextAccessor;
-        //public Utilidades(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
-        public Utilidades(IConfiguration configuration)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWebHostEnvironment _environment;
+
+        public Utilidades(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
         {
             _configuration = configuration;
-            //_httpContextAccessor = httpContextAccessor;
+            _httpContextAccessor = httpContextAccessor;
+            _environment = environment;
         }
 
         public string EncriptarSHA256(string texto)
@@ -120,8 +122,8 @@ namespace gaco_api.Customs
                 var bytes = Convert.FromBase64String(base64);
                 await File.WriteAllBytesAsync(rutaArchivo, bytes);
 
-                return rutaArchivo;
-                //return $"{carpeta}/{nombreUnico}.{extension}";
+                // return rutaArchivo;
+                return $"{carpeta}/{nombreUnico}.{extension}";
             }
             catch (Exception ex)
             {
@@ -157,6 +159,45 @@ namespace gaco_api.Customs
                 // Registrar el error si es necesario y lanzar una excepción más descriptiva
                 throw new InvalidOperationException($"Error al convertir el archivo a Base64: {ex.Message}", ex);
             }
+        }
+
+        public decimal GetBase64SizeInKB(string base64String)
+        {
+            if (string.IsNullOrEmpty(base64String))
+            {
+                return 0;
+            }
+
+            // Decodificar la cadena Base64 en un arreglo de bytes
+            byte[] byteArray = Convert.FromBase64String(base64String);
+
+            // Obtener el tamaño en bytes y convertir a KB
+            decimal sizeInBytes = byteArray.Length;
+            return sizeInBytes / 1024.0m;
+        }
+
+        public string GetFullUrl(string relativePath)
+        {
+            if (string.IsNullOrEmpty(relativePath))
+                throw new ArgumentException("La ruta relativa no puede estar vacía.");
+
+            // Obtener el esquema (http o https) y el host (incluido el puerto si es necesario)
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            // Combinar con la ruta relativa
+            return $"{baseUrl}{relativePath}";
+        }
+
+        public string GetPhysicalPath(string relativePath)
+        {
+            if (string.IsNullOrEmpty(relativePath))
+                throw new ArgumentException("La ruta relativa no puede estar vacía.");
+
+            // Combinar ContentRootPath con la ruta relativa
+            string physicalPath = Path.Combine(_environment.ContentRootPath, relativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+            return physicalPath;
         }
 
         //public string ObtenerUrlArchivo(string rutaRelativa)
