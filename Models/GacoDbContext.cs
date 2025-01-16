@@ -6,13 +6,15 @@ namespace gaco_api.Models;
 
 public partial class GacoDbContext : DbContext
 {
+    private readonly IConfiguration _configuration;
     public GacoDbContext()
     {
     }
 
-    public GacoDbContext(DbContextOptions<GacoDbContext> options)
+    public GacoDbContext(DbContextOptions<GacoDbContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
@@ -33,6 +35,8 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Evidencia> Evidencias { get; set; }
 
+    public virtual DbSet<GastosEmpresa> GastosEmpresas { get; set; }
+
     public virtual DbSet<LogUsuario> LogUsuarios { get; set; }
 
     public virtual DbSet<Producto> Productos { get; set; }
@@ -45,9 +49,9 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=dev_gaco_db;Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -293,6 +297,21 @@ public partial class GacoDbContext : DbContext
                 .HasConstraintName("FK_Evidencias_Seguimentos_Id");
         });
 
+        modelBuilder.Entity<GastosEmpresa>(entity =>
+        {
+            entity.ToTable("GastosEmpresa");
+
+            entity.Property(e => e.Activo).HasDefaultValue(true);
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("descripcion");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<LogUsuario>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__LogUsuar__3214EC07CFECD745");
@@ -367,6 +386,7 @@ public partial class GacoDbContext : DbContext
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
             entity.Property(e => e.MontoGasto).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.MontoVenta).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Porcentaje).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Unidad)
                 .HasMaxLength(100)
                 .IsUnicode(false);

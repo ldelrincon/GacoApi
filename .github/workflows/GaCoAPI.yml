@@ -45,18 +45,34 @@ jobs:
           script -q -c "warp-cli --accept-tos connector new 'eyJhIjoiOTVhYTFkODk1NjExODc5MmQ0MjY2YTJlZGU1MTBjZDgiLCJ0IjoiMzU1YWJmZDQtNTA4Ni00MTliLWEwMTYtZDhkYThiODA3MjVkIiwicyI6InVxS25lQmwyeGpVbFgrbkRnRmRTdzltU0FML0hXQXBHUm8vQ1BmVGNzT0V0K2dpUXIxZ0hKaFljVXhXUk5vaHd0anQwQkJTR2FWNlM0bXBtVURIK0ZnPT0ifQ=='"
           script -q -c "warp-cli --accept-tos registration show"
           script -q -c "warp-cli --accept-tos connect"
+          sleep 15
           script -q -c "warp-cli --accept-tos status"
 
-      # Paso 7: Instalar sshpass y copiar archivos al servidor remoto
+      # Paso 7: Instalar sshpass, realizar el respaldo, y gestionar respaldos antiguos
       - name: Deploy to server
         env:
           SSH_USERNAME: root
           SSH_PASSWORD: v50llDtK
           SERVER_IP: 69.48.202.76
         run: |
-          sudo apt-get install -y sshpass
+          sudo apt-get install -y sshpass rar
+          BACKUP_PATH="/home/Respaldos/API"
+          BACKUP_FILE="$(date +%d-%m-%Y_%H-%M).rar"
+
+          echo "Creating backup of current deployment..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rar a $BACKUP_PATH/$BACKUP_FILE /var/www/html/api"
+
+          echo "Cleaning old backups, keeping the last 3..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" \
+            "ls -1t $BACKUP_PATH/*.rar | tail -n +4 | xargs -d '\n' rm -f || true"
+
+          echo "Stopping GacoApi service..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
+
+          echo "Deploying new files..."
           sshpass -p "$SSH_PASSWORD" rsync -avz ./publish/ "$SSH_USERNAME@$SERVER_IP:/var/www/html/api/"
+
+          echo "Starting GacoApi service..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl start GacoApi"
 
       # Paso 8: Verificar el estado del servicio (opcional)
