@@ -548,6 +548,7 @@ namespace gaco_api.Controllers
                 // Obtener el ID del usuario conectado
                 var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (!long.TryParse(nameIdentifier, out long userId))
+
                 {
                     return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
                 }
