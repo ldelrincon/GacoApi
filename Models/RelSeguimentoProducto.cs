@@ -27,6 +27,8 @@ public partial class RelSeguimentoProducto
 
     public decimal? MontoVenta { get; set; }
 
+    public decimal? Porcentaje { get; set; }
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual Producto IdProductoNavigation { get; set; } = null!;
