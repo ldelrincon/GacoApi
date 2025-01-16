@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("gaco_api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32e764e226019d4c2910ac0ff0e7e0e4a16826cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b4d4ed723977b034161c4b2916af0862fe4a5e7")]
 [assembly: System.Reflection.AssemblyProductAttribute("gaco_api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("gaco_api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

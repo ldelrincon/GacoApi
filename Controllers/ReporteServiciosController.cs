@@ -313,7 +313,7 @@ namespace gaco_api.Controllers
                             Cantidad = item.Cantidad,
                             FechaCreacion = item.FechaCreacion,
                             FechaModificacion = item.FechaModificacion,
-                            Id = item.Id,
+                            Id = item.IdProducto,
                             IdCatEstatus = item.IdCatEstatus,
                             IdProducto = item.IdProducto,
                             IdSeguimento = item.IdSeguimento,
@@ -579,6 +579,7 @@ namespace gaco_api.Controllers
                 reporte.ObservacionesRecomendaciones = request.ObservacionesRecomendaciones;
                 reporte.UsuarioEncargado = request.UsuarioEncargado;
                 reporte.FechaInicio = request.FechaInicio;
+                reporte.Accesorios = request.Accesorios;
                 //reporte.IdUsuarioModificacion = userId;
                 reporte.FechaModificacion = DateTime.UtcNow;
                 reporte.UsuarioTecnico = request.UsuarioTecnico;
