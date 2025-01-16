@@ -120,7 +120,7 @@ namespace ClbNegGestores
                 decimal? SubTotal = 0, Iva = 0, Total = 0, IvaAplicado = 0;
                 foreach (var objProductos in objReporteServicioResponse.Productos)
                 {
-                    SubTotal += (objProductos.Cantidad * objProductos.MontoGasto);
+                    SubTotal += (objProductos.Cantidad * objProductos.MontoVenta);
                 }
                 Iva = SubTotal * .16m;
                 Total = SubTotal + Iva;

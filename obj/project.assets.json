@@ -26167,24 +26167,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\arbal\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
+      "projectUniqueName": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
       "projectName": "gaco_api",
-      "projectPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\gaco_api.csproj",
-      "packagesPath": "C:\\Users\\arbal\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\arbal\\OneDrive\\Documentos\\Gerardo\\Programacion\\DelRincon\\GACO\\Codigo\\GacoApi\\obj\\",
+      "projectPath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
+      "packagesPath": "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\",
+      "outputPath": "C:\\ProyectoLuis\\GacoApi\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\arbal\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\LuisOctavioDelRincón\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -26192,7 +26187,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -26289,39 +26283,39 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Runtime.linux-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.AspNetCore.App.Runtime.osx-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.linux-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.osx-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.linux-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.osx-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.NETCore.App.Runtime.win-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           },
           {
             "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
-            "version": "[8.0.12, 8.0.12]"
+            "version": "[8.0.11, 8.0.11]"
           }
         ],
         "frameworkReferences": {
@@ -26332,7 +26326,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.405/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
       }
     },
     "runtimes": {
