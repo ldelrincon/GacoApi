@@ -21,7 +21,9 @@ builder.Services.AddDbContext<GacoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddSingleton<Utilidades>();
+builder.Services.AddScoped<Utilidades>();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(config =>
 {
