@@ -238,7 +238,7 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
-                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
@@ -476,7 +476,7 @@ namespace gaco_api.Controllers
                             Cantidad = producto.Cantidad,
                             Unidad = "",
                             Porcentaje = producto.Porcentaje,
-                            MontoVenta = (producto.Cantidad * producto.MontoGasto)
+                            MontoVenta = producto.MontoVenta
                         };
                         await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProducto);
                         await _context.SaveChangesAsync();
@@ -631,7 +631,7 @@ namespace gaco_api.Controllers
                             Cantidad = producto.Cantidad,
                             Unidad = "",
                             Porcentaje = producto.Porcentaje,
-                            MontoVenta = (producto.Cantidad * producto.MontoGasto)
+                            MontoVenta = producto.MontoVenta
                         };
 
                         await _context.RelSeguimentoProductos.AddAsync(nuevoProducto);
