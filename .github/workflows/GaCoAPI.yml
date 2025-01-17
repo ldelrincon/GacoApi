@@ -55,19 +55,7 @@ jobs:
           SSH_PASSWORD: v50llDtK
           SERVER_IP: 69.48.202.76
         run: |
-          sudo apt-get install -y sshpass rar
-          BACKUP_PATH="/home/Respaldos/API"
-          BACKUP_FILE="$(date +%d-%m-%Y_%H-%M).rar"
-
-          echo "Creating backup of current deployment..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "rar a $BACKUP_PATH/$BACKUP_FILE /var/www/html/api"
-
-          echo "Cleaning old backups, keeping the last 3..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" \
-            "ls -1t $BACKUP_PATH/*.rar | tail -n +4 | xargs -d '\n' rm -f || true"
-
-          echo "Stopping GacoApi service..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
+          sudo apt-get install -y sshpass
 
           echo "Ensuring source directory exists..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "mkdir -p /var/www/html/api"
