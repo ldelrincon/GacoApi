@@ -69,6 +69,9 @@ jobs:
           echo "Stopping GacoApi service..."
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
 
+          echo "Ensuring source directory exists..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "mkdir -p /var/www/html/api"
+
           echo "Deploying new files..."
           sshpass -p "$SSH_PASSWORD" rsync -avz ./publish/ "$SSH_USERNAME@$SERVER_IP:/var/www/html/api/"
 
