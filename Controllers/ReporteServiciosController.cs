@@ -816,5 +816,58 @@ namespace gaco_api.Controllers
                     new DefaultResponse<object> { Message = ex.Message });
             }
         }
+
+        [HttpGet]
+        [Route("SeguimentoPorId/{id}")]
+        public async Task<IActionResult> ReporteServicioSeguimentoPorId(long id)
+        {
+            var response = new DefaultResponse<DatosReporteSolicitudSeguimento>();
+
+            // Seleccionar y aplicar paginación
+            var reporteServicio = await _context.ReporteServicios
+                .Where(x => x.Id == id)
+                .Select(x => new DatosReporteSolicitudSeguimento
+                {
+                    Id = x.Id,
+                    Accesorios = x.Accesorios,
+                    Estatus = x.IdCatEstatusNavigation.Estatus,
+                    Cliente = x.IdClienteNavigation.Nombre,
+                    Descripcion = x.Descripcion,
+                    FechaCreacion = x.FechaCreacion,
+                    FechaInicio = x.FechaInicio,
+                    FechaModificacion =x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    IdCatSolicitud = x.IdCatSolicitud,
+                    IdCliente = x.IdCliente,
+                    IdUsuarioCreacion = x.IdUsuarioCreacion,
+                    ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                    ServicioCorrectivo = x.ServicioCorrectivo,
+                    ServicioPreventivo = x.ServicioPreventivo,
+                    TipoSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+                    Titulo = x.Titulo,
+                    UsuarioCreacion = $"{x.IdUsuarioCreacionNavigation.Nombres} {x.IdUsuarioCreacionNavigation.Apellidos}",
+                    UsuarioEncargado = x.UsuarioEncargado,
+                    UsuarioTecnico = x.UsuarioTecnico,
+                }).FirstOrDefaultAsync();
+
+            if (reporteServicio != null)
+            {
+                response = new DefaultResponse<DatosReporteSolicitudSeguimento>
+                {
+                    Success = true,
+                    Data = reporteServicio,
+                };
+            }
+            else
+            {
+                response = new DefaultResponse<DatosReporteSolicitudSeguimento>
+                {
+                    Success = false,
+                    Message = "No se encontro el Reporte Servicio."
+                };
+            }
+
+            return Ok(response);
+        }
     }
 }
