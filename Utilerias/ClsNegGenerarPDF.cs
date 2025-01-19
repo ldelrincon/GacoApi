@@ -196,7 +196,7 @@ namespace ClbNegGestores
                 sb.AppendLine("    <tr>");
                 sb.AppendLine($"      <td>{objProductos.Producto}</td>");
                 sb.AppendLine($"      <td>{objProductos.Cantidad}</td>");
-                sb.AppendLine($"      <td>{objProductos.MontoGasto?.ToString("C2")}</td>");
+                sb.AppendLine($"      <td>{objProductos.MontoVenta?.ToString("C2")}</td>");
                 //sb.AppendLine($"      <td>{persona.Edad}</td>");
                 sb.AppendLine("    </tr>");
             }

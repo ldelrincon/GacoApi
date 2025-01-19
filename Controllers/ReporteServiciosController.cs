@@ -250,7 +250,7 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
-                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
@@ -563,6 +563,7 @@ namespace gaco_api.Controllers
                 // Obtener el ID del usuario conectado
                 var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (!long.TryParse(nameIdentifier, out long userId))
+
                 {
                     return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
                 }
