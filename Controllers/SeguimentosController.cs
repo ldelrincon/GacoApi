@@ -1,4 +1,9 @@
-﻿using gaco_api.Models;
+﻿using gaco_api.Customs;
+using gaco_api.Models;
+using gaco_api.Models.DTOs.Responses;
+using gaco_api.Models.DTOs.Responses.Evidencias;
+using gaco_api.Models.DTOs.Responses.Relaciones;
+using gaco_api.Models.DTOs.Responses.Seguimientos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +16,82 @@ namespace gaco_api.Controllers
     public class SeguimentosController : ControllerBase
     {
         private readonly GacoDbContext _context;
+        private readonly Utilidades _utilidades;
 
-        public SeguimentosController(GacoDbContext context)
+        public SeguimentosController(GacoDbContext context, Utilidades utilidades)
         {
             _context = context;
+            _utilidades = utilidades;
+        }
+
+        [HttpGet]
+        [Route("ReporteServicioSeguimentoPorId/{id}")]
+        public async Task<IActionResult> ReporteServicioSeguimentoPorId(long id)
+        {
+            var response = new DefaultResponse<List<SeguimientoResponse>>();
+
+            var seguimento = await _context.Seguimentos
+                .Include(x => x.Evidencia)
+                .Include(x => x.RelSeguimentoProductos).ThenInclude(x => x.IdProductoNavigation)
+                .Where(x => x.IdReporteServicio == id)
+                .OrderBy(x => x.FechaCreacion)
+                .Select(x => new SeguimientoResponse
+                {
+                    Id = x.Id,
+                    FechaCreacion = x.FechaCreacion,
+                    DescripcionProximaVisita = x.DescripcionProximaVisita,
+                    Estatus = x.IdCatEstatusNavigation.Estatus,
+                    FechaModificacion = x.FechaModificacion,
+                    IdCatEstatus = x.IdCatEstatus,
+                    IdReporteServicio = x.IdReporteServicio,
+                    IdUsuario = x.IdUsuario,
+                    ProximaVisita =x.ProximaVisita,
+                    Seguimento1 = x.Seguimento1,
+                    TituloReporteServicio = x.IdReporteServicioNavigation.Titulo,
+                    Usuario = $"{x.IdUsuarioNavigation.Nombres} {x.IdUsuarioNavigation.Apellidos}",
+                    Evidencias = x.Evidencia.Select(e=> new EvidenciaResponse
+                    {
+                        Extension = e.Extension ?? "",
+                        FechaCreacion = e.FechaCreacion,
+                        FechaModificacion = e.FechaModificacion,
+                        Id = e.Id,
+                        IdCatEstatus = e.IdCatEstatus,
+                        IdSeguimento = e.IdSeguimento,
+                        Nombre = e.Nombre,
+                        Ruta = _utilidades.GetFullUrl(e.Ruta),
+                    }).ToList(),
+                    Productos = x.RelSeguimentoProductos.Select(p => new RelSeguimentoProductoResponse
+                    {
+                        Cantidad = p.Cantidad,
+                        FechaCreacion = p.FechaCreacion,
+                        FechaModificacion = p.FechaModificacion,
+                        Id = p.IdProducto,
+                        IdCatEstatus = p.IdCatEstatus,
+                        IdProducto = p.IdProducto,
+                        IdSeguimento = p.IdSeguimento,
+                        IdUsuario = p.IdUsuario,
+                        MontoGasto = p.MontoGasto,
+                        MontoVenta = p.MontoVenta,
+                        Codigo = p.IdProductoNavigation.Codigo,
+                        Producto = p.IdProductoNavigation.Producto1,
+                        Unidad = p.Unidad,
+                        Porcentaje = p.Porcentaje,
+                    }).ToList()
+
+                }).ToListAsync();
+
+            if (seguimento != null)
+            {
+                response.Success = true;
+                response.Data = seguimento;
+            }
+            else
+            {
+                response.Success = false;
+                response.Message = "No se encontro el Reporte Servicio.";
+            }
+
+            return Ok(response);
         }
 
         // GET: api/Seguimentos
