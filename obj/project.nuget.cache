@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "bMEe0OBrfXw=",
+  "dgSpecHash": "6omTaEsOpaI=",
   "success": true,
   "projectFilePath": "C:\\ProyectoLuis\\GacoApi\\gaco_api.csproj",
   "expectedPackageFiles": [
@@ -282,15 +282,15 @@
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\system.windows.extensions\\7.0.0\\system.windows.extensions.7.0.0.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\system.xml.readerwriter\\4.0.11\\system.xml.readerwriter.4.0.11.nupkg.sha512",
     "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\system.xml.xdocument\\4.0.11\\system.xml.xdocument.4.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-x64\\8.0.11\\microsoft.netcore.app.runtime.linux-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.host.osx-x64\\8.0.11\\microsoft.netcore.app.host.osx-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\8.0.11\\microsoft.netcore.app.host.linux-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.11\\microsoft.aspnetcore.app.runtime.win-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.osx-x64\\8.0.11\\microsoft.netcore.app.runtime.osx-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.11\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.11\\microsoft.netcore.app.runtime.win-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.osx-x64\\8.0.11\\microsoft.aspnetcore.app.runtime.osx-x64.8.0.11.nupkg.sha512",
-    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\8.0.11\\microsoft.aspnetcore.app.runtime.linux-x64.8.0.11.nupkg.sha512"
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-x64\\8.0.12\\microsoft.netcore.app.runtime.linux-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.host.osx-x64\\8.0.12\\microsoft.netcore.app.host.osx-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.host.linux-x64\\8.0.12\\microsoft.netcore.app.host.linux-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.12\\microsoft.aspnetcore.app.runtime.win-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.osx-x64\\8.0.12\\microsoft.netcore.app.runtime.osx-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.12\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.12\\microsoft.netcore.app.runtime.win-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.osx-x64\\8.0.12\\microsoft.aspnetcore.app.runtime.osx-x64.8.0.12.nupkg.sha512",
+    "C:\\Users\\LuisOctavioDelRincón\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-x64\\8.0.12\\microsoft.aspnetcore.app.runtime.linux-x64.8.0.12.nupkg.sha512"
   ],
   "logs": [
     {
