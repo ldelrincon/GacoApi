@@ -22,6 +22,28 @@ namespace gaco_api.Customs
             _environment = environment;
         }
 
+        public byte[] GetFileBytes(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("La ruta del archivo no puede estar vacía.", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("El archivo no existe.", filePath);
+            }
+
+            try
+            {
+                return File.ReadAllBytes(filePath);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException($"Error al leer el archivo en {filePath}.", ex);
+            }
+        }
+
         public string EncriptarSHA256(string texto)
         {
             using(var sha256Hash = SHA256.Create())
@@ -51,7 +73,7 @@ namespace gaco_api.Customs
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: userClaims,
-                expires: DateTime.UtcNow.AddHours(1), // Tiempo de expiración
+                expires: DateTime.UtcNow.AddHours(10), // Tiempo de expiración
                 signingCredentials: credentials
             );
 
@@ -116,11 +138,12 @@ namespace gaco_api.Customs
 
                 // Generar un nombre único para el archivo
                 var nombreUnico = $"{Guid.NewGuid()}_{DateTime.UtcNow:yyyyMMddHHmmss}";
-                var rutaArchivo = Path.Combine(rutaCarpeta, $"{nombreUnico}.{extension}");
+                var rutaArchivo = $"{rutaCarpeta}/{nombreUnico}.{extension}";
 
                 // Convertir el Base64 a bytes y guardar el archivo
                 var bytes = Convert.FromBase64String(base64);
-                await File.WriteAllBytesAsync(rutaArchivo, bytes);
+                await File.WriteAllBytesAsync(GetPhysicalPath(rutaArchivo), bytes);
+                //await File.WriteAllBytesAsync(rutaArchivo, bytes);
 
                 // return rutaArchivo;
                 return $"{carpeta}/{nombreUnico}.{extension}";
@@ -191,13 +214,16 @@ namespace gaco_api.Customs
 
         public string GetPhysicalPath(string relativePath)
         {
-            if (string.IsNullOrEmpty(relativePath))
-                throw new ArgumentException("La ruta relativa no puede estar vacía.");
+            if (string.IsNullOrEmpty(relativePath) )
+               return string.Empty;
 
             // Combinar ContentRootPath con la ruta relativa
             string physicalPath = Path.Combine(_environment.ContentRootPath, relativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-
-            return physicalPath;
+            //if (!File.Exists(physicalPath))
+            //{
+            //    return string.Empty;
+            //}
+                return physicalPath;
         }
 
         //public string ObtenerUrlArchivo(string rutaRelativa)

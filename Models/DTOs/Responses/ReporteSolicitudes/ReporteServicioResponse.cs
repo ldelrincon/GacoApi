@@ -56,5 +56,8 @@ namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
         public decimal? Total { get; set; }
 
         public string? Totalstr { get; set; }
+
+        public decimal? TotalGasto { get; set; }
+        public string? TotalGastostr { get; set; }
     }
 }
