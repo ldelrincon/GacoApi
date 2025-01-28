@@ -24,13 +24,15 @@ namespace gaco_api.Controllers
     {
         private readonly GacoDbContext _context;
         private readonly Utilidades _utilidades;
+        private readonly NotificacionCorreo _NotificacionCorreo;
         private readonly IConfiguration _configuration;
          private readonly IWebHostEnvironment _env;
 
-        public ReporteServiciosController(GacoDbContext context, Utilidades utilidades, IConfiguration configuration, IWebHostEnvironment env)
+        public ReporteServiciosController(GacoDbContext context, Utilidades utilidades, NotificacionCorreo NotificacionCorreo, IConfiguration configuration, IWebHostEnvironment env)
         {
             _context = context;
             _utilidades = utilidades;
+            _NotificacionCorreo = NotificacionCorreo;
             _configuration = configuration;
             _env = env;
         }
@@ -108,11 +110,14 @@ namespace gaco_api.Controllers
                      .FirstOrDefaultAsync(x => x.IdReporteServicio == objReporteServicioResponse.Id);
 
                     objReporteServicioResponse.Total = 0;
+                    objReporteServicioResponse.TotalGasto = 0;
                     foreach (var item in primerSeguimento.RelSeguimentoProductos)
                     {
-                        objReporteServicioResponse.Total += (item.Cantidad * item.MontoGasto);
+                        objReporteServicioResponse.Total += (item.Cantidad * item.MontoVenta);
+                        objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
                     }
                     objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                    objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
                     if (objReporteServicioResponse.Totalstr == null)
                     {
                         objReporteServicioResponse.Totalstr = "$0.00";
@@ -234,8 +239,8 @@ namespace gaco_api.Controllers
                         IdCatEstatus = item.IdCatEstatus,
                         IdSeguimento = item.IdSeguimento,
                         Nombre = item.Nombre,
-                        Ruta = _utilidades.GetFullUrl(item.Ruta),
-                        Base64 = await _utilidades.ObtenerBase64Async(item.Ruta),
+                        Ruta = (item.Ruta),
+                        Base64 = await _utilidades.ObtenerBase64Async(_utilidades.GetPhysicalPath(item.Ruta)),
                     });
                 }
 
@@ -250,6 +255,7 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
+                //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
                 TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
@@ -263,7 +269,7 @@ namespace gaco_api.Controllers
                 TargetCorreo.strHost = "smtp.ionos.com";
                 TargetCorreo.usaSSL = false;
 
-                NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
             }
             catch (Exception ex)
             {

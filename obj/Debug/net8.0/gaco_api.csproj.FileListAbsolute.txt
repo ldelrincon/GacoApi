@@ -536,3 +536,7 @@ C:\Users\arbal\OneDrive\Documentos\Gerardo\Programacion\DelRincon\GACO\Codigo\Ga
 C:\Users\arbal\OneDrive\Documentos\Gerardo\Programacion\DelRincon\GACO\Codigo\GacoApi\obj\Debug\net8.0\gaco_api.pdb
 C:\Users\arbal\OneDrive\Documentos\Gerardo\Programacion\DelRincon\GACO\Codigo\GacoApi\obj\Debug\net8.0\gaco_api.genruntimeconfig.cache
 C:\Users\arbal\OneDrive\Documentos\Gerardo\Programacion\DelRincon\GACO\Codigo\GacoApi\obj\Debug\net8.0\ref\gaco_api.dll
+C:\ProyectoLuis\GacoApi\bin\Debug\net8.0\gaco_api.staticwebassets.endpoints.json
+C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\staticwebassets\msbuild.gaco_api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\ProyectoLuis\GacoApi\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

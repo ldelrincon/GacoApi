@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using gaco_api.Utilerias;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<GacoDbContext>(options =>
 });
 
 builder.Services.AddScoped<Utilidades>();
+builder.Services.AddScoped<NotificacionCorreo>();
 
 builder.Services.AddHttpContextAccessor();
 

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reporte de Servicio</title>
     <style>
+        .page-break {
+            page-break-before: always; /* Fuerza el salto de página antes */
+            break-before: page; /* Compatibilidad con navegadores modernos */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -49,7 +53,7 @@
             </td>
         </tr>
         <tr>
-            <th colspan="4">Reporte de Servicio</th>
+            <th colspan="4" style="text-align:center"><h3>Reporte de Servicio</h3></th>
         </tr>
         <tr>
             <th>Cliente:</th>
@@ -82,14 +86,21 @@
         </tr>
         <tr>
             <th>Servicio Preventivo:</th>
-            <td><span id="Preventivo"></span></td>
+            <td colspan="1"><span id="Preventivo"></span></td>
             <th>Servicio Correctivo:</th>
-            <td><span id="Correctivo"></span></td>
+            <td colspan="1"><span id="Correctivo"></span></td>
         </tr>
-        <tr>
-            <th>Trabajo Realizado:</th>
-            <td colspan="3"><span id="TrabajoRealizado"></span></td>
+        <tr style="height: 50px;">
+            <!-- Ajusta la altura -->
+            <th style="padding: 10px;">Trabajo Realizado:</th>
+            <td colspan="3" style="padding: 10px;">
+                <span id="TrabajoRealizado" style="padding: 10px;"></span>
+            </td>
         </tr>
+        <!--<tr>
+        <th>Trabajo Realizado:</th>
+        <td colspan="3"><span id="TrabajoRealizado"></span></td>
+    </tr>-->
         <tr>
             <th>Materiales Utilizados:</th>
             <td colspan="3"><span id="Productos"></span></td>
@@ -112,11 +123,12 @@
     <div class="signature">
         <table>
             <tr>
-                <td> <span id="EncargadoArea"></span> <br />
+                <td>
+                    <span id="EncargadoArea"></span> <br />
                     <strong>Encargado del Área:</strong>
                 </td>
                 <td>
-                   <span id="TecnicoEncargado"></span>
+                    <span id="TecnicoEncargado"></span>
                     <br />
                     <strong>Técnico Encargado:</strong>
                 </td>
@@ -125,11 +137,19 @@
     </div>
     <br />
     <br />
-    <div style="float:right">
-
-        <strong>SubTotal:</strong><span id="SubTotal">$100:00</span><br />
-        <strong>IVA:</strong><span id="Iva">$16:00</span><br />
-        <strong>Total:</strong><span id="Total">$116:00</span><br />
+   
+    <div style="float: right; text-align: right;">
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>SubTotal:</strong><span id="SubTotal">$100.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>IVA:</strong><span id="Iva">$16.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>Total:</strong><span id="Total">$116.00</span>
+        </div>
     </div>
+    <div class="page-break"></div>
+    <div id="Imagenes"></div>
 </body>
 </html>

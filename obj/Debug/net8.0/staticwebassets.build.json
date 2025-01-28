@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "Ow/a181BGMAtMPOf3z19QyB80zKCr5G0f0XMWBsR0eU=",
+  "Hash": "Dxho9askHUjcPosn1As46KU8nmGwNaKtfTLEj2W1yNs=",
   "Source": "gaco_api",
   "BasePath": "_content/gaco_api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }
