@@ -368,8 +368,10 @@ FodyWeavers.xsd
 /bin/Debug/net8.0/
 /obj/Debug/net8.0/
 /obj/Debug/net8.0/gaco_api.GeneratedMSBuildEditorConfig.editorconfig}
-
-binDebug/net8.0/
-/obj/Debug/net8.0/
-
 /bin/Debug/net8.0/gaco_api.dll
+/bin/Debug/net8.0/gaco_api.exe
+/bin/Debug/net8.0/gaco_api.pdb
+/obj/gaco_api.csproj.nuget.dgspec.json
+/obj/gaco_api.csproj.nuget.g.props
+/obj/project.assets.json
+/obj/project.nuget.cache
