@@ -365,6 +365,11 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Exclude specific Debug folder for .NET 8
-bin/Debug/net8.0/
-obj/Debug/net8.0/
-/obj/Debug/net8.0/gaco_api.GeneratedMSBuildEditorConfig.editorconfig
+/bin/Debug/net8.0/
+/obj/Debug/net8.0/
+/obj/Debug/net8.0/gaco_api.GeneratedMSBuildEditorConfig.editorconfig}
+
+binDebug/net8.0/
+/obj/Debug/net8.0/
+
+/bin/Debug/net8.0/gaco_api.dll
