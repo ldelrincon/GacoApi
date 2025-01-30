@@ -133,7 +133,7 @@ namespace gaco_api.Customs
                 //local
                 //var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
                 // produccion
-                var rutaCarpeta = carpeta;
+                var rutaCarpeta = "/" + carpeta;
                 if (!Directory.Exists(rutaCarpeta))
                 {
                     Directory.CreateDirectory(rutaCarpeta);

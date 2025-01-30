@@ -677,7 +677,7 @@ namespace gaco_api.Controllers
                         try
                         {
                             rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
-                                $"/Evidencias/Seguimento_{seguimiento!.Id}",
+                                $"/Evidencias/Seguimiento_{seguimiento!.Id}",
                                 evidenciaRS.Extension,
                                 evidenciaRS.Base64
                             );
