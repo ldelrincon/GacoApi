@@ -130,7 +130,10 @@ namespace gaco_api.Customs
             try
             {
                 // Crear la carpeta si no existe
-                var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
+                //local
+                //var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
+                // produccion
+                var rutaCarpeta = Path.Combine("/home/Evidencias", carpeta);
                 if (!Directory.Exists(rutaCarpeta))
                 {
                     Directory.CreateDirectory(rutaCarpeta);
