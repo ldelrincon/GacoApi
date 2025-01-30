@@ -149,7 +149,7 @@ namespace gaco_api.Customs
                 //await File.WriteAllBytesAsync(rutaArchivo, bytes);
 
                 // return rutaArchivo;
-                return $"{carpeta}/{nombreUnico}.{extension}";
+                return $"{rutaCarpeta}/{nombreUnico}.{extension}";
             }
             catch (Exception ex)
             {
