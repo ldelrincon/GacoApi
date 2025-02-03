@@ -240,5 +240,47 @@ namespace gaco_api.Controllers
                     new DefaultResponse<object> { Message = ex.Message });
             }
         }
+
+
+
+        [HttpGet]
+        [Route("Eliminar/{id}")]
+        public async Task<ActionResult> Eliminar(long id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Buscar al cliente existente por su ID
+                var producto = await _context.Productos.FindAsync(id);
+                if (producto == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Message = "Producto no encontrado." });
+                }
+
+                // Actualizar los datos del produto
+                producto.IdCatEstatus = 2;
+                producto.FechaModificacion = DateTime.Now;
+
+                // Guardar los cambios
+                _context.Productos.Update(producto);
+                await _context.SaveChangesAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Producto elimnado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
+
     }
 }
