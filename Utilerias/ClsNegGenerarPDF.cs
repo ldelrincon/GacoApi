@@ -73,7 +73,7 @@ namespace ClbNegGestores
                 doc2.GetElementbyId("EncargadoArea").InnerHtml = objReporteServicioResponse.UsuarioEncargado;
                 doc2.GetElementbyId("TecnicoEncargado").InnerHtml = objReporteServicioResponse.UsuarioTecnico ?? "sin asignar";
                 doc2.GetElementbyId("FechaVisita").InnerHtml = textoFechaVisita;
-                doc2.GetElementbyId("DescripcionVisita").InnerHtml = objReporteServicioResponse.DescripcionProximaVisita;
+                doc2.GetElementbyId("DescripcionVisita").InnerHtml = objReporteServicioResponse.DescripcionProximaVisita ?? "";
                 doc2.GetElementbyId("RegimenFiscal").InnerHtml = objReporteServicioResponse.RegimenFiscal;
                 doc2.GetElementbyId("Productos").InnerHtml = strTablaProductos;
                 doc2.GetElementbyId("Imagenes").InnerHtml = strTablaEvidencias;
@@ -132,7 +132,10 @@ namespace ClbNegGestores
 
         static string GenerarTablaHtmlImagenes(ReporteServicioResponse objReporteServicioResponse)
         {
+
             var sb = new StringBuilder();
+            string strValidacion = "";
+            string strReturn = "";
 
             sb.AppendLine("<table border=\"1\">");
             sb.AppendLine("  <thead>");
@@ -162,6 +165,7 @@ namespace ClbNegGestores
                     {
                         sb.AppendLine("    </tr>");
                     }
+                    strValidacion = "Contiene";
                 }
             }
 
@@ -174,7 +178,16 @@ namespace ClbNegGestores
             sb.AppendLine("  </tbody>");
             sb.AppendLine("</table>");
 
-            return sb.ToString();
+            //return sb.ToString();
+            if (strValidacion == "Contiene")
+            {
+                strReturn = strValidacion;
+            }
+            else
+            {
+                strReturn= sb.ToString();
+            }
+            return strReturn;
         }
 
 
