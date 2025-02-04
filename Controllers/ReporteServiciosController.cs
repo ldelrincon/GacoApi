@@ -736,7 +736,7 @@ namespace gaco_api.Controllers
 
             query = query.Where(
                 x => x.IdCatSolicitud == 1 
-                && x.IdCatEstatus == 3 
+                && new int[] { 3, 4, 5 }.Contains(x.IdCatEstatus) 
                 // && x.IdUsuarioCreacion == userId
             );
 
@@ -790,6 +790,7 @@ namespace gaco_api.Controllers
         [Route("CambiarEstatusEnSeguimento")]
         public async Task<ActionResult> CambiarEstatus(CambiarEstatusEnSeguimentoRequest request)
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 if (!ModelState.IsValid)
@@ -803,13 +804,30 @@ namespace gaco_api.Controllers
                     return Conflict(new DefaultResponse<object> { Message = "El reporte no existe o no se encontró." });
                 }
 
+                switch (request.IdEstatus)
+                {
+                    case 3: // En Seguimiento.
+                        reporte.FechaInicio = reporte.FechaInicio ?? DateTime.Now;
+                        break;
+                    case 4: // Facturación.
+
+                        break;
+                    case 5: // Finalizado.
+                        
+                        break;
+                    default:
+                        break;
+                }
+
                 // Actualizar los datos
-                reporte.IdCatEstatus = 3;
-                reporte.FechaInicio = reporte.FechaInicio ?? DateTime.Now;
+                reporte.IdCatEstatus = request.IdEstatus;
 
                 // Guardar los cambios
                 _context.ReporteServicios.Update(reporte);
                 await _context.SaveChangesAsync();
+
+                // Confirmar transacción
+                await transaction.CommitAsync();
 
                 return Ok(new DefaultResponse<object>
                 {
@@ -819,6 +837,7 @@ namespace gaco_api.Controllers
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync(); // Deshacer cambios si hay error
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new DefaultResponse<object> { Message = ex.Message });
             }
