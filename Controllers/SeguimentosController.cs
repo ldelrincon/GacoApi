@@ -1,5 +1,6 @@
 ﻿using gaco_api.Customs;
 using gaco_api.Models;
+using gaco_api.Models.DTOs.Requests.Seguimentos;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Evidencias;
 using gaco_api.Models.DTOs.Responses.Relaciones;
@@ -7,6 +8,7 @@ using gaco_api.Models.DTOs.Responses.Seguimientos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace gaco_api.Controllers
 {
@@ -94,88 +96,121 @@ namespace gaco_api.Controllers
             return Ok(response);
         }
 
-        // GET: api/Seguimentos
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Seguimento>>> GetSeguimentos()
+        [HttpPost]
+        [Route("NuevoAdjuntos")]
+        public async Task<ActionResult> NuevoAdjuntos(SeguimientoProductoEvidenciaRequest request)
         {
-            return await _context.Seguimentos.ToListAsync();
-        }
-
-        // GET: api/Seguimentos/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Seguimento>> GetSeguimento(long id)
-        {
-            var seguimento = await _context.Seguimentos.FindAsync(id);
-
-            if (seguimento == null)
-            {
-                return NotFound();
-            }
-
-            return seguimento;
-        }
-
-        // PUT: api/Seguimentos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSeguimento(long id, Seguimento seguimento)
-        {
-            if (id != seguimento.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(seguimento).State = EntityState.Modified;
-
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Obtener el ID del usuario conectado
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!long.TryParse(nameIdentifier, out long userId))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+
+                // Crear el primer seguimiento
+                var seguimiento = new Seguimento
+                {
+                    IdReporteServicio = request.IdReporteServicio,
+                    IdUsuario = userId,
+                    Seguimento1 = request.Seguimiento,
+                    IdCatEstatus = 1,
+                    ProximaVisita = request.ProximaVisita,
+                    DescripcionProximaVisita = request.DescripcionProximaVisita,
+                };
+
+                await _context.Seguimentos.AddAsync(seguimiento);
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SeguimentoExists(id))
+
+                // Validar y relacionar productos
+                if (request.Productos != null && request.Productos.Any())
                 {
-                    return NotFound();
+                    foreach (var producto in request.Productos)
+                    {
+                        if (!await _context.Productos.AnyAsync(x => x.Id == producto.Id))
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "El producto no se encontró." });
+                        }
+
+                        if (producto.Cantidad <= 0)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = "La cantidad de producto debe ser mayor a 0." });
+                        }
+
+                        var relSeguimentoProducto = new RelSeguimentoProducto
+                        {
+                            IdSeguimento = seguimiento.Id,
+                            IdProducto = producto.Id,
+                            MontoGasto = producto.MontoGasto,
+                            IdUsuario = userId,
+                            IdCatEstatus = 1,
+                            Cantidad = producto.Cantidad,
+                            Unidad = "",
+                            Porcentaje = producto.Porcentaje,
+                            MontoVenta = producto.MontoVenta
+                        };
+                        await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProducto);
+                        await _context.SaveChangesAsync();
+                    }
                 }
-                else
+
+                // Procesar evidencias
+                if (request.Evidencias != null && request.Evidencias.Any())
                 {
-                    throw;
+                    foreach (var evidenciaRS in request.Evidencias)
+                    {
+                        string rutaEvidencia;
+                        try
+                        {
+                            rutaEvidencia = await _utilidades.GuardarArchivoBase64Async(
+                                $"/Evidencias/Seguimento_{seguimiento.Id}",
+                                evidenciaRS.Extension,
+                                evidenciaRS.Base64
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            await transaction.RollbackAsync();
+                            return Conflict(new DefaultResponse<object> { Message = $"Error al guardar evidencia: {ex.Message}" });
+                        }
+
+                        var evidencia = new Evidencia
+                        {
+                            IdSeguimento = seguimiento.Id,
+                            Nombre = evidenciaRS.Nombre,
+                            Extension = evidenciaRS.Extension,
+                            Ruta = rutaEvidencia,
+                            IdCatEstatus = 1,
+                        };
+                        await _context.Evidencias.AddAsync(evidencia);
+                        await _context.SaveChangesAsync();
+                    }
                 }
+
+                // await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Registrado correctamente."
+                });
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Seguimentos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Seguimento>> PostSeguimento(Seguimento seguimento)
-        {
-            _context.Seguimentos.Add(seguimento);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSeguimento", new { id = seguimento.Id }, seguimento);
-        }
-
-        // DELETE: api/Seguimentos/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSeguimento(long id)
-        {
-            var seguimento = await _context.Seguimentos.FindAsync(id);
-            if (seguimento == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                await transaction.RollbackAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
             }
-
-            _context.Seguimentos.Remove(seguimento);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SeguimentoExists(long id)
-        {
-            return _context.Seguimentos.Any(e => e.Id == id);
         }
     }
 }

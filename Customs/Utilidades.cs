@@ -130,13 +130,11 @@ namespace gaco_api.Customs
             try
             {
                 // Crear la carpeta si no existe
-                //local
-                //var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
-                // produccion
-                var rutaCarpeta = "home/" + carpeta;
-                if (!Directory.Exists(rutaCarpeta))
+                var rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), carpeta);
+                var rutaFisica = GetPhysicalPath(rutaCarpeta);
+                if (!Directory.Exists(rutaFisica))
                 {
-                    Directory.CreateDirectory(rutaCarpeta);
+                    Directory.CreateDirectory(rutaFisica);
                 }
 
                 // Generar un nombre único para el archivo
