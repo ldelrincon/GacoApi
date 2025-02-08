@@ -78,9 +78,9 @@ namespace ClbNegGestores
                 doc2.GetElementbyId("Productos").InnerHtml = strTablaProductos;
                 doc2.GetElementbyId("Imagenes").InnerHtml = strTablaEvidencias;
 
-                doc2.GetElementbyId("SubTotal").InnerHtml = SubTotal?.ToString("C2");
-                doc2.GetElementbyId("Iva").InnerHtml = Iva?.ToString("C2");
-                doc2.GetElementbyId("Total").InnerHtml = Total?.ToString("C2");
+                doc2.GetElementbyId("SubTotal").InnerHtml = SubTotal?.ToString("C2")?? "$0.00";
+                doc2.GetElementbyId("Iva").InnerHtml = Iva?.ToString("C2") ?? "$0.00";
+                doc2.GetElementbyId("Total").InnerHtml = Total?.ToString("C2") ?? "$0.00";
 
 
                 doc2.GetElementbyId("RutaCorreosNezterLoanding").SetAttributeValue("src", RutaCorreosNezterLoanding);
@@ -181,11 +181,11 @@ namespace ClbNegGestores
             //return sb.ToString();
             if (strValidacion == "Contiene")
             {
-                strReturn = strValidacion;
+                strReturn = sb.ToString();
             }
             else
             {
-                strReturn= sb.ToString();
+                strReturn= "";
             }
             return strReturn;
         }
