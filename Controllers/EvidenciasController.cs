@@ -1,7 +1,11 @@
 ﻿using gaco_api.Models;
+using gaco_api.Models.DTOs.Responses.Productos;
+using gaco_api.Models.DTOs.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using gaco_api.Models.DTOs.Responses.Evidencias;
+using gaco_api.Customs;
 
 namespace gaco_api.Controllers
 {
@@ -11,94 +15,64 @@ namespace gaco_api.Controllers
     public class EvidenciasController : ControllerBase
     {
         private readonly GacoDbContext _context;
+        private readonly Utilidades _utilidades;
 
-        public EvidenciasController(GacoDbContext context)
+        public EvidenciasController(GacoDbContext context, Utilidades utilidades)
         {
             _context = context;
+            _utilidades = utilidades;
         }
 
-        // GET: api/Evidencias
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Evidencia>>> GetEvidencias()
+        [Route("PorId/{id}")]
+        public async Task<IActionResult> EvidenciaPorId(long id)
         {
-            return await _context.Evidencias.ToListAsync();
-        }
+            var response = new DefaultResponse<EvidenciaResponse>();
 
-        // GET: api/Evidencias/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Evidencia>> GetEvidencia(long id)
-        {
-            var evidencia = await _context.Evidencias.FindAsync(id);
+            var evidencia = await _context.Evidencias
+                .Where(x => x.Id == id)
+                .Select(item => new
+                {
+                    item.Extension,
+                    item.FechaCreacion,
+                    item.FechaModificacion,
+                    item.Id,
+                    item.IdCatEstatus,
+                    item.IdSeguimento,
+                    item.Nombre,
+                    item.Ruta
+                })
+                .FirstOrDefaultAsync();
 
             if (evidencia == null)
             {
-                return NotFound();
+                response.Success = false;
+                response.Message = "Evidencia no encontrada";
+                return NotFound(response);
             }
 
-            return evidencia;
-        }
+            // Convertir la ruta a Base64 después de obtener el resultado de la BD
+            var base64 = await _utilidades.ObtenerBase64Async(_utilidades.GetPhysicalPath(evidencia.Ruta));
 
-        // PUT: api/Evidencias/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvidencia(long id, Evidencia evidencia)
-        {
-            if (id != evidencia.Id)
+            response = new DefaultResponse<EvidenciaResponse>
             {
-                return BadRequest();
-            }
-
-            _context.Entry(evidencia).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EvidenciaExists(id))
+                Success = true,
+                Data = new EvidenciaResponse
                 {
-                    return NotFound();
+                    Extension = evidencia.Extension ?? "",
+                    FechaCreacion = evidencia.FechaCreacion,
+                    FechaModificacion = evidencia.FechaModificacion,
+                    Id = evidencia.Id,
+                    IdCatEstatus = evidencia.IdCatEstatus,
+                    IdSeguimento = evidencia.IdSeguimento,
+                    Nombre = evidencia.Nombre,
+                    Ruta = evidencia.Ruta,
+                    Base64 = base64
                 }
-                else
-                {
-                    throw;
-                }
-            }
+            };
 
-            return NoContent();
+            return Ok(response);
         }
 
-        // POST: api/Evidencias
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Evidencia>> PostEvidencia(Evidencia evidencia)
-        {
-            _context.Evidencias.Add(evidencia);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEvidencia", new { id = evidencia.Id }, evidencia);
-        }
-
-        // DELETE: api/Evidencias/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvidencia(long id)
-        {
-            var evidencia = await _context.Evidencias.FindAsync(id);
-            if (evidencia == null)
-            {
-                return NotFound();
-            }
-
-            _context.Evidencias.Remove(evidencia);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool EvidenciaExists(long id)
-        {
-            return _context.Evidencias.Any(e => e.Id == id);
-        }
     }
 }
