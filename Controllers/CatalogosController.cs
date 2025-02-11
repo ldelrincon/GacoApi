@@ -154,5 +154,21 @@ namespace gaco_api.Controllers
                 Data = response
             });
         }
+
+        [HttpGet]
+        [Route("ListaCatEstatus")]
+        public async Task<IActionResult> ListaCatEstatus()
+        {
+            var catalogo = await _context.CatEstatuses.ToListAsync();
+
+            // Crear la respuesta
+            var response = new DefaultResponse<List<CatEstatus>>
+            {
+                Success = true,
+                Data = catalogo,
+            };
+
+            return Ok(response);
+        }
     }
 }

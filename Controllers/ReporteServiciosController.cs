@@ -409,7 +409,7 @@ namespace gaco_api.Controllers
                     return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
                 }
 
-                request.IdCatSolicitud = 1;
+                //request.IdCatSolicitud = 1;
                
                 // Obtener el ID del usuario conectado
                 var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -449,7 +449,7 @@ namespace gaco_api.Controllers
                     IdCliente = request.IdCliente,
                     Titulo = request.Titulo,
                     Descripcion = request.Descripcion,
-                    IdCatEstatus = 1,
+                    IdCatEstatus = 6, /*Estatus: nuevo.*/
                     FechaInicio = request.FechaInicio,
                     Accesorios = request.Accesorios,
                     ServicioPreventivo = request.ServicioPreventivo,

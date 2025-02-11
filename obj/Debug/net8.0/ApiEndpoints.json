@@ -91,6 +91,16 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.CatalogosController",
+    "Method": "ListaCatEstatus",
+    "RelativePath": "api/Catalogos/ListaCatEstatus",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.CatalogosController",
     "Method": "ListaCatGrupoProductos",
     "RelativePath": "api/Catalogos/ListaCatGrupoProductos",
     "HttpMethod": "GET",
@@ -237,102 +247,9 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.EvidenciasController",
-    "Method": "GetEvidencias",
-    "RelativePath": "api/Evidencias",
+    "Method": "EvidenciaPorId",
+    "RelativePath": "api/Evidencias/PorId/{id}",
     "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[gaco_api.Models.Evidencia, gaco_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "gaco_api.Controllers.EvidenciasController",
-    "Method": "PostEvidencia",
-    "RelativePath": "api/Evidencias",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "evidencia",
-        "Type": "gaco_api.Models.Evidencia",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "gaco_api.Models.Evidencia",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "gaco_api.Controllers.EvidenciasController",
-    "Method": "GetEvidencia",
-    "RelativePath": "api/Evidencias/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int64",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "gaco_api.Models.Evidencia",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "gaco_api.Controllers.EvidenciasController",
-    "Method": "PutEvidencia",
-    "RelativePath": "api/Evidencias/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int64",
-        "IsRequired": true
-      },
-      {
-        "Name": "evidencia",
-        "Type": "gaco_api.Models.Evidencia",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "gaco_api.Controllers.EvidenciasController",
-    "Method": "DeleteEvidencia",
-    "RelativePath": "api/Evidencias/{id}",
-    "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [

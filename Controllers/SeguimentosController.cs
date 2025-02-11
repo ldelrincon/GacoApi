@@ -61,6 +61,7 @@ namespace gaco_api.Controllers
                         IdSeguimento = e.IdSeguimento,
                         Nombre = e.Nombre,
                         Ruta = _utilidades.GetFullUrl(e.Ruta),
+                        //Base64 = _utilidades.ObtenerBase64Async(e.Ruta).Result
                     }).ToList(),
                     Productos = x.RelSeguimentoProductos.Select(p => new RelSeguimentoProductoResponse
                     {
