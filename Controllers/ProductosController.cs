@@ -49,6 +49,7 @@ namespace gaco_api.Controllers
 
             // Seleccionar y aplicar paginación
             var productos = await query
+                .Where(p=> p.IdCatEstatus == 1)
                 .Select(x => new ProductoResponse
                 {
                     Id = x.Id,
