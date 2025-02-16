@@ -27,6 +27,8 @@ public partial class Usuario
 
     public int IdCatEstatus { get; set; }
 
+    public virtual ICollection<Gasto> Gastos { get; set; } = new List<Gasto>();
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual CatTipoUsuario IdCatTipoUsuarioNavigation { get; set; } = null!;
