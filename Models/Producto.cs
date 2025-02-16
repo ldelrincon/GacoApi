@@ -21,6 +21,8 @@ public partial class Producto
 
     public string Codigo { get; set; } = null!;
 
+    public virtual ICollection<DetalleGasto> DetalleGastos { get; set; } = new List<DetalleGasto>();
+
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
 
     public virtual CatGrupoProducto IdCatGrupoProductoNavigation { get; set; } = null!;
