@@ -39,6 +39,8 @@ public partial class CatEstatus
 
     public virtual ICollection<Producto> Productos { get; set; } = new List<Producto>();
 
+    public virtual ICollection<RelPerfilEstatus> RelPerfilEstatuses { get; set; } = new List<RelPerfilEstatus>();
+
     public virtual ICollection<RelSeguimentoProducto> RelSeguimentoProductos { get; set; } = new List<RelSeguimentoProducto>();
 
     public virtual ICollection<ReporteServicio> ReporteServicios { get; set; } = new List<ReporteServicio>();

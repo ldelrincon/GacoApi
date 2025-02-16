@@ -6,15 +6,13 @@ namespace gaco_api.Models;
 
 public partial class GacoDbContext : DbContext
 {
-    private readonly IConfiguration _configuration;
     public GacoDbContext()
     {
     }
 
-    public GacoDbContext(DbContextOptions<GacoDbContext> options, IConfiguration configuration)
+    public GacoDbContext(DbContextOptions<GacoDbContext> options)
         : base(options)
     {
-        _configuration = configuration;
     }
 
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
@@ -45,6 +43,8 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
+    public virtual DbSet<RelPerfilEstatus> RelPerfilEstatuses { get; set; }
+
     public virtual DbSet<RelSeguimentoProducto> RelSeguimentoProductos { get; set; }
 
     public virtual DbSet<ReporteServicio> ReporteServicios { get; set; }
@@ -54,7 +54,8 @@ public partial class GacoDbContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=dev_gaco_db; Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -423,6 +424,17 @@ public partial class GacoDbContext : DbContext
                 .HasForeignKey(d => d.IdCatGrupoProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Productos_CatGrupoProductos_Id");
+        });
+
+        modelBuilder.Entity<RelPerfilEstatus>(entity =>
+        {
+            entity.HasKey(e => e.IdRelPerfilEstatus);
+
+            entity.ToTable("RelPerfilEstatus");
+
+            entity.HasOne(d => d.IdEstatusNavigation).WithMany(p => p.RelPerfilEstatuses)
+                .HasForeignKey(d => d.IdEstatus)
+                .HasConstraintName("FK_RelPerfilEstatus_RelPerfilEstatus_IdEstatus");
         });
 
         modelBuilder.Entity<RelSeguimentoProducto>(entity =>

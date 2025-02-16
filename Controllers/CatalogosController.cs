@@ -1,9 +1,11 @@
 ﻿using gaco_api.Models;
 using gaco_api.Models.DTOs.Responses;
 using gaco_api.Models.DTOs.Responses.Catalogos;
+using gaco_api.Models.DTOs.Responses.Usuarios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace gaco_api.Controllers
 {
@@ -159,7 +161,34 @@ namespace gaco_api.Controllers
         [Route("ListaCatEstatus")]
         public async Task<IActionResult> ListaCatEstatus()
         {
-            var catalogo = await _context.CatEstatuses.ToListAsync();
+          
+            // Obtener el ID del usuario conectado
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            long.TryParse(nameIdentifier, out long userId);
+            // Seleccionar y aplicar paginación
+            // Seleccionar y aplicar paginación
+            var usuario = await _context.Usuarios
+                .Where(u => u.Id == userId)
+                .Select(ur => new EditarUsuarioResponse
+                {
+                    Id = ur.Id,
+                    IdCatTipoUsuario = ur.IdCatTipoUsuario,
+                    Apellidos = ur.Apellidos,
+                    Correo = ur.Correo,
+                    Nombres = ur.Nombres,
+                    IdCatEstatus = ur.IdCatEstatus,
+                    Telefono = ur.Telefono,
+                    FechaCreacion = ur.FechaCreacion,
+                    FechaModificacion = ur.FechaModificacion,
+                    CorreoConfirmado = ur.CorreoConfirmado,
+                    Contrasena = string.Empty
+                }).FirstOrDefaultAsync();
+
+            var catalogo = await _context.CatEstatuses
+                                 .Where(e => _context.RelPerfilEstatuses
+                                                      .Any(ep => ep.IdEstatus == e.Id && ep.IdPerfil == usuario.IdCatTipoUsuario))
+                                 .ToListAsync();
+
 
             // Crear la respuesta
             var response = new DefaultResponse<List<CatEstatus>>
