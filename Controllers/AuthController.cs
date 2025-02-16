@@ -131,7 +131,7 @@ namespace gaco_api.Controllers
                     {
                         Username = string.IsNullOrEmpty($"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}") ? "Anonymous" : $"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}",
                         Correo = usuarioDTO.Correo,
-                        Rol = usuarioDTO.TipoUsuario,
+                        Rol = usuarioDTO.IdCatTipoUsuario,
                         Token = _utilidades.GenerarJWT(usuarioDTO),
                         IdEmpresa = "",
                         NombreEmpresa = "",
