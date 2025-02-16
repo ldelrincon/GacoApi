@@ -116,7 +116,8 @@ namespace gaco_api.Controllers
                         Correo = m.Correo,
                         CorreoConfirmado = m.CorreoConfirmado,
                         FechaCreacion = m.FechaCreacion,
-                        IdCatEstatus = m.IdCatEstatus,
+                        IdCatEstatus = m.IdCatEstatus
+                      
                     }).FirstOrDefaultAsync();
 
                 if (usuarioDTO == null)
@@ -149,10 +150,11 @@ namespace gaco_api.Controllers
                     {
                         Username = string.IsNullOrEmpty($"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}") ? "Anonymous" : $"{usuarioDTO.Nombres} {usuarioDTO.Apellidos}",
                         Correo = usuarioDTO.Correo,
-                        Rol = usuarioDTO.TipoUsuario,
+                        Rol = usuarioDTO.IdCatTipoUsuario,
                         jwtToken = _utilidades.GenerarJWT(usuarioDTO),
                         IdEmpresa = "",
                         NombreEmpresa = "",
+                   
 
                         Rol2 = ""
                     }
