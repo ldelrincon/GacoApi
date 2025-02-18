@@ -6,13 +6,15 @@ namespace gaco_api.Models;
 
 public partial class GacoDbContext : DbContext
 {
+    private readonly IConfiguration _configuration;
     public GacoDbContext()
     {
     }
 
-    public GacoDbContext(DbContextOptions<GacoDbContext> options)
+    public GacoDbContext(DbContextOptions<GacoDbContext> options, IConfiguration configuration)
         : base(options)
     {
+        _configuration = configuration;
     }
 
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
@@ -30,8 +32,6 @@ public partial class GacoDbContext : DbContext
     public virtual DbSet<CatTipoUsuario> CatTipoUsuarios { get; set; }
 
     public virtual DbSet<Cliente> Clientes { get; set; }
-
-    public virtual DbSet<DetalleGasto> DetalleGastos { get; set; }
 
     public virtual DbSet<Evidencia> Evidencias { get; set; }
 
@@ -54,8 +54,7 @@ public partial class GacoDbContext : DbContext
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=dev_gaco_db; Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -268,33 +267,6 @@ public partial class GacoDbContext : DbContext
                 .HasConstraintName("FK_Clientes_CatRegimenFiscales_Id");
         });
 
-        modelBuilder.Entity<DetalleGasto>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__DetalleG__3214EC07C4CD9F58");
-
-            entity.Property(e => e.Cantidad).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.FechaCreacion)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
-            entity.Property(e => e.Monto).HasColumnType("decimal(18, 2)");
-
-            entity.HasOne(d => d.IdCatEstatusNavigation).WithMany(p => p.DetalleGastos)
-                .HasForeignKey(d => d.IdCatEstatus)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DetalleGastos_CatEstatuses_Id");
-
-            entity.HasOne(d => d.IdGastoNavigation).WithMany(p => p.DetalleGastos)
-                .HasForeignKey(d => d.IdGasto)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DetalleGastos_Gastos_Id");
-
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleGastos)
-                .HasForeignKey(d => d.IdProducto)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DetalleGastos_Producto_Id");
-        });
-
         modelBuilder.Entity<Evidencia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Evidenci__3214EC07887F9876");
@@ -330,12 +302,16 @@ public partial class GacoDbContext : DbContext
 
         modelBuilder.Entity<Gasto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC072B112FE0");
+            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC077FAD6B60");
 
+            entity.Property(e => e.Concepto).HasMaxLength(250);
+            entity.Property(e => e.Descripcion).HasMaxLength(250);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.Monto).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.RutaPdffactura)
                 .HasMaxLength(800)
                 .IsUnicode(false)
