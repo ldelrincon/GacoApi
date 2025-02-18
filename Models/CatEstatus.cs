@@ -31,13 +31,13 @@ public partial class CatEstatus
 
     public virtual ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
 
-    public virtual ICollection<DetalleGasto> DetalleGastos { get; set; } = new List<DetalleGasto>();
-
     public virtual ICollection<Evidencia> Evidencia { get; set; } = new List<Evidencia>();
 
     public virtual ICollection<Gasto> Gastos { get; set; } = new List<Gasto>();
 
     public virtual ICollection<Producto> Productos { get; set; } = new List<Producto>();
+
+    public virtual ICollection<RelPerfilEstatus> RelPerfilEstatuses { get; set; } = new List<RelPerfilEstatus>();
 
     public virtual ICollection<RelSeguimentoProducto> RelSeguimentoProductos { get; set; } = new List<RelSeguimentoProducto>();
 

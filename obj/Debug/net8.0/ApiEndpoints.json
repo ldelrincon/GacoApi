@@ -297,7 +297,7 @@
     "ContainingType": "gaco_api.Controllers.GastosController",
     "Method": "EliminarGasto",
     "RelativePath": "api/Gastos/Eliminar/{id}",
-    "HttpMethod": "DELETE",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
