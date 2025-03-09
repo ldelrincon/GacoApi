@@ -375,3 +375,5 @@ FodyWeavers.xsd
 /obj/gaco_api.csproj.nuget.g.props
 /obj/project.assets.json
 /obj/project.nuget.cache
+/obj/Debug/net8.0/gaco_api.assets.cache
+/obj/Debug/net8.0/gaco_api.genruntimeconfig.cache
