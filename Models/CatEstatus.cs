@@ -31,6 +31,8 @@ public partial class CatEstatus
 
     public virtual ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
 
+    public virtual ICollection<DetGasto> DetGastos { get; set; } = new List<DetGasto>();
+
     public virtual ICollection<Evidencia> Evidencia { get; set; } = new List<Evidencia>();
 
     public virtual ICollection<Gasto> Gastos { get; set; } = new List<Gasto>();
