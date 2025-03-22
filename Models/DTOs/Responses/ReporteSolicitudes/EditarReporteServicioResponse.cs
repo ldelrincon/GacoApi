@@ -27,5 +27,10 @@ namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
         public List<EvidenciaResponse>? Evidencias { get; set; }
         public DateTime? ProximaVisita {  get; set; }
         public string? DescripcionProximaVisita { get; set; }
+
+        // Mano de Obra.
+        public decimal MontoGasto { get; set; }
+        public decimal Porcentaje { get; set; }
+        public decimal MontoVenta { get; set; }
     }
 }
