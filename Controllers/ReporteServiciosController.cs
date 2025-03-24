@@ -260,8 +260,8 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
-                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                //TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
@@ -790,8 +790,8 @@ namespace gaco_api.Controllers
                 .AsQueryable();
 
             query = query.Where(
-                x => x.IdCatSolicitud == 1 
-                && new int[] { 3, 4, 5 }.Contains(x.IdCatEstatus) 
+                x => 
+                 new int[] { 3, 4, 5 }.Contains(x.IdCatEstatus) 
                 // && x.IdUsuarioCreacion == userId
             );
 
@@ -970,8 +970,8 @@ namespace gaco_api.Controllers
                         try
                         {
                             var TargetCorreo = new ClsModCorreo();
-                            TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                            //TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                            //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                            TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                             TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                             TargetCorreo.strFromNombre = string.Empty;
                             TargetCorreo.strCC = string.Empty;
