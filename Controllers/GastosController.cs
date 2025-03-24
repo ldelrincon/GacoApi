@@ -4,7 +4,6 @@ using gaco_api.Models.DTOs.Requests.Gastos;
 using gaco_api.Models.DTOs.Responses.Gastos;
 using gaco_api.Models.DTOs.Responses;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -45,15 +44,10 @@ namespace gaco_api.Controllers
                 FechaModificacion = g.FechaModificacion,
                 IdCatEstatus = g.IdCatEstatus,
                 NombreCatEstatus = g.IdCatEstatusNavigation.Estatus,
-                Factura = g.Factura,
                 IdUsuarioCreacion = g.IdUsuarioCreacion,
                 NombreUsuarioCreacion = g.IdUsuarioCreacionNavigation.Nombres + " " + g.IdUsuarioCreacionNavigation.Apellidos,
-                RutaPdffactura = g.RutaPdffactura,
-                RutaXmlfactura = g.RutaXmlfactura,
                 Concepto = g.Concepto,
-                Descripcion = g.Descripcion,
-                Fecha = g.Fecha,
-                Monto = g.Monto
+                Monto = g.DetGastos.Sum(x => x.Monto)
             })
             .Where(x => x.IdCatEstatus == 1)
             .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
@@ -72,17 +66,25 @@ namespace gaco_api.Controllers
                 .Select(g => new EditarGastoResponse
                 {
                     Id = g.Id,
-                    Factura = g.Factura,
                     FechaCreacion = g.FechaCreacion,
                     FechaModificacion = g.FechaModificacion,
                     IdCatEstatus = g.IdCatEstatus,
                     IdUsuarioCreacion = g.IdUsuarioCreacion,
-                    RutaPdffactura = g.RutaPdffactura,
-                    RutaXmlfactura = g.RutaXmlfactura,
-                    Monto = g.Monto,
-                    Fecha = g.Fecha,
-                    Descripcion = g.Descripcion,
-                    Concepto = g.Concepto
+                    Concepto = g.Concepto,
+                    DetGastos = g.DetGastos.Select(d => new DetGastoResponse
+                    {
+                        Id = d.Id,
+                        IdGasto = d.IdGasto,
+                        Descripcion = d.Descripcion,
+                        Factura = d.Factura,
+                        Fecha = d.Fecha,
+                        IdCatEstatus = d.IdCatEstatus,
+                        RutaPdffactura = d.RutaPdffactura,
+                        RutaXmlfactura = d.RutaXmlfactura,
+                        Monto = d.Monto,
+                        FechaCreacion = d.FechaCreacion,
+                        FechaModificacion = d.FechaModificacion,
+                    }).ToList()
                 })
                 .FirstOrDefaultAsync();
 
@@ -110,22 +112,36 @@ namespace gaco_api.Controllers
                 var nuevoGasto = new Gasto
                 {
                     Concepto = request.Concepto,
-                    Fecha = request.Fecha,
-                    Descripcion = request.Descripcion,
-                    Monto = request.Monto,
-                    Factura = request.Factura,
                     IdUsuarioCreacion = userId,
-                    RutaPdffactura = request.RutaPdffactura,
-                    RutaXmlfactura = request.RutaXmlfactura,
                     IdCatEstatus = 1,
                     FechaCreacion = DateTime.UtcNow,
                 };
 
                 await _context.Gastos.AddAsync(nuevoGasto);
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
 
-                return Ok(new DefaultResponse<object> { Success = true, Message = "Gasto registrado correctamente." });
+                // Insertar los detalles del gasto si existen
+                if (request.DetGastos != null && request.DetGastos.Any())
+                {
+                    var detallesGasto = request.DetGastos.Select(detalle => new DetGasto
+                    {
+                        IdGasto = nuevoGasto.Id, // Asignamos el ID del gasto recién creado
+                        Fecha = detalle.Fecha,
+                        Descripcion = detalle.Descripcion,
+                        Monto = detalle.Monto,
+                        Factura = detalle.Factura,
+                        RutaPdffactura = detalle.RutaPdffactura,
+                        RutaXmlfactura = detalle.RutaXmlfactura,
+                        IdCatEstatus = 1,
+                        FechaCreacion = DateTime.UtcNow,
+                    }).ToList();
+
+                    await _context.DetGastos.AddRangeAsync(detallesGasto);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return Ok(new DefaultResponse<object> { Success = true, Message = "Gasto y detalles registrados correctamente." });
             }
             catch (Exception ex)
             {
@@ -134,28 +150,63 @@ namespace gaco_api.Controllers
             }
         }
 
+
         [HttpPost]
         [Route("Actualizar")]
         public async Task<IActionResult> ActualizarGasto(ActualizarGastoRequest request)
         {
-            var gasto = await _context.Gastos.FindAsync(request.Id);
-            if (gasto == null)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                return NotFound(new DefaultResponse<object> { Success = false, Message = "Gasto no encontrado." });
+                var gasto = await _context.Gastos
+                    .Include(g => g.DetGastos) // Cargamos los detalles relacionados
+                    .FirstOrDefaultAsync(g => g.Id == request.Id);
+
+                if (gasto == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Success = false, Message = "Gasto no encontrado." });
+                }
+
+                // Actualizar el gasto
+                gasto.Concepto = request.Concepto;
+                gasto.FechaModificacion = DateTime.UtcNow;
+
+                // Eliminar todos los detalles existentes
+                var listaDetalles = await _context.DetGastos.Where(d => d.IdGasto == gasto.Id).ToListAsync();
+                _context.DetGastos.RemoveRange(listaDetalles);  // Eliminar los detalles obtenidos
+                await _context.SaveChangesAsync(); // Guardar la eliminación antes de insertar los nuevos
+
+                // Insertar los nuevos detalles
+                if (request.DetGastos != null && request.DetGastos.Any())
+                {
+                    var nuevosDetalles = request.DetGastos.Select(detalle => new DetGasto
+                    {
+                        IdGasto = gasto.Id,
+                        Fecha = detalle.Fecha,
+                        Descripcion = detalle.Descripcion,
+                        Monto = detalle.Monto,
+                        Factura = detalle.Factura,
+                        RutaPdffactura = detalle.RutaPdffactura,
+                        RutaXmlfactura = detalle.RutaXmlfactura,
+                        IdCatEstatus = detalle.IdCatEstatus,
+                        FechaCreacion = DateTime.UtcNow
+                    }).ToList();
+
+                    await _context.DetGastos.AddRangeAsync(nuevosDetalles);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new DefaultResponse<object> { Success = true, Message = "Gasto y detalles actualizados correctamente." });
             }
-
-            gasto.Concepto = request.Concepto;
-            gasto.Fecha = request.Fecha;
-            gasto.Descripcion = request.Descripcion;
-            gasto.Monto = request.Monto;
-            gasto.Factura = request.Factura;
-            gasto.RutaPdffactura = request.RutaPdffactura;
-            gasto.RutaXmlfactura = request.RutaXmlfactura;
-            gasto.FechaModificacion = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return Ok(new DefaultResponse<object> { Success = true, Message = "Gasto actualizado correctamente." });
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(new DefaultResponse<object> { Success = false, Message = ex.Message });
+            }
         }
+
 
         [HttpGet]
         [Route("Eliminar/{id}")]
