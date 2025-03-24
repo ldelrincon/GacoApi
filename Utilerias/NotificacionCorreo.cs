@@ -135,9 +135,9 @@ namespace gaco_api.Utilerias
 
             // Adjuntar el archivo PDF
             //bodyBuilder.Attachments.Add(filePath);
-            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-                            data: pdf,
-                            contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+            //bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
+            //                data: pdf,
+            //                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
 
             foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x=>x.Extension.Contains("pdf")).ToList())
             {

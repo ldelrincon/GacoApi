@@ -260,8 +260,8 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
-                //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                //TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
@@ -914,7 +914,7 @@ namespace gaco_api.Controllers
                     case 3: // En Seguimiento.
                         reporte.FechaInicio = reporte.FechaInicio ?? DateTime.Now;
                         break;
-                    case 4: // Facturación.
+                    case 5: // Facturación.
                         ClsModResult result = new();
 
                         try
@@ -941,9 +941,7 @@ namespace gaco_api.Controllers
                             result.MsgError = ex.ToString();
                         }
                         break;
-                    case 5: // Finalizado.
-                        
-                        break;
+                 
                     default:
                         break;
                 }
