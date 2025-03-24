@@ -329,8 +329,24 @@ namespace gaco_api.Controllers
                     .FirstOrDefaultAsync(x => x.IdReporteServicio == reporteServicio.Id);
 
                 if (primerSeguimento != null) {
+
+                    // Mano de Obra.
+                    long manoObraId = 0;
+                    var productoManoDeObra = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == "MO01");
+                    if (productoManoDeObra != null)
+                    {
+                        var manoDeObra = primerSeguimento.RelSeguimentoProductos.Where(p => p.IdProducto == productoManoDeObra.Id).FirstOrDefault();
+                        if (manoDeObra != null)
+                        {
+                            manoObraId = manoDeObra.IdProducto;
+                            reporteServicio.MontoGasto = manoDeObra.MontoGasto ?? 0;
+                            reporteServicio.Porcentaje = manoDeObra.Porcentaje ?? 0;
+                            reporteServicio.MontoVenta = manoDeObra.MontoVenta ?? 0;
+                        }
+                    }
+
                     // Llenar Productos.
-                    foreach (var item in primerSeguimento.RelSeguimentoProductos)
+                    foreach (var item in primerSeguimento.RelSeguimentoProductos.Where(p=> p.IdProducto != manoObraId))
                     {
                         reporteServicio.Productos.Add(new RelSeguimentoProductoResponse()
                         {
@@ -473,6 +489,23 @@ namespace gaco_api.Controllers
                     DescripcionProximaVisita = request.DescripcionProximaVisita,
                 };
                 await _context.Seguimentos.AddAsync(primerSeguimiento);
+                await _context.SaveChangesAsync();
+
+                // Mano de Obra.
+                var productoManoDeObra = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == "MO01");
+                var relSeguimentoProductoManoDeObra = new RelSeguimentoProducto
+                {
+                    IdSeguimento = primerSeguimiento.Id,
+                    IdProducto = productoManoDeObra?.Id ?? 67,
+                    MontoGasto = request.MontoGasto,
+                    IdUsuario = userId,
+                    IdCatEstatus = 1,
+                    Cantidad = 1,
+                    Unidad = "",
+                    Porcentaje = request.Porcentaje,
+                    MontoVenta = request.MontoVenta
+                };
+                await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProductoManoDeObra);
                 await _context.SaveChangesAsync();
 
                 // Validar y relacionar productos
@@ -626,6 +659,23 @@ namespace gaco_api.Controllers
                         .ToListAsync();
 
                     _context.RelSeguimentoProductos.RemoveRange(productosActuales);
+                    await _context.SaveChangesAsync();
+
+                    // Mano de Obra.
+                    var productoManoDeObra = await _context.Productos.FirstOrDefaultAsync(p => p.Codigo == "MO01");
+                    var relSeguimentoProductoManoDeObra = new RelSeguimentoProducto
+                    {
+                        IdSeguimento = seguimiento.Id,
+                        IdProducto = productoManoDeObra?.Id ?? 67,
+                        MontoGasto = request.MontoGasto,
+                        IdUsuario = userId,
+                        IdCatEstatus = 1,
+                        Cantidad = 1,
+                        Unidad = "",
+                        Porcentaje = request.Porcentaje,
+                        MontoVenta = request.MontoVenta
+                    };
+                    await _context.RelSeguimentoProductos.AddAsync(relSeguimentoProductoManoDeObra);
                     await _context.SaveChangesAsync();
 
                     foreach (var producto in request.Productos)

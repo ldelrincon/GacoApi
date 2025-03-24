@@ -33,6 +33,8 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Cliente> Clientes { get; set; }
 
+    public virtual DbSet<DetGasto> DetGastos { get; set; }
+
     public virtual DbSet<Evidencia> Evidencias { get; set; }
 
     public virtual DbSet<Gasto> Gastos { get; set; }
@@ -267,6 +269,37 @@ public partial class GacoDbContext : DbContext
                 .HasConstraintName("FK_Clientes_CatRegimenFiscales_Id");
         });
 
+        modelBuilder.Entity<DetGasto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__DetGasto__3214EC07174DE0D8");
+
+            entity.Property(e => e.Descripcion).HasMaxLength(250);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
+            entity.Property(e => e.Monto).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.RutaPdffactura)
+                .HasMaxLength(800)
+                .IsUnicode(false)
+                .HasColumnName("RutaPDFFactura");
+            entity.Property(e => e.RutaXmlfactura)
+                .HasMaxLength(800)
+                .IsUnicode(false)
+                .HasColumnName("RutaXMLFactura");
+
+            entity.HasOne(d => d.IdCatEstatusNavigation).WithMany(p => p.DetGastos)
+                .HasForeignKey(d => d.IdCatEstatus)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DetGastos_CatEstatuses_Id");
+
+            entity.HasOne(d => d.IdGastoNavigation).WithMany(p => p.DetGastos)
+                .HasForeignKey(d => d.IdGasto)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DetGastos_Gastos_Id");
+        });
+
         modelBuilder.Entity<Evidencia>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Evidenci__3214EC07887F9876");
@@ -302,24 +335,13 @@ public partial class GacoDbContext : DbContext
 
         modelBuilder.Entity<Gasto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC077FAD6B60");
+            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC076BA89E1E");
 
             entity.Property(e => e.Concepto).HasMaxLength(250);
-            entity.Property(e => e.Descripcion).HasMaxLength(250);
-            entity.Property(e => e.Fecha).HasColumnType("datetime");
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
-            entity.Property(e => e.Monto).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.RutaPdffactura)
-                .HasMaxLength(800)
-                .IsUnicode(false)
-                .HasColumnName("RutaPDFFactura");
-            entity.Property(e => e.RutaXmlfactura)
-                .HasMaxLength(800)
-                .IsUnicode(false)
-                .HasColumnName("RutaXMLFactura");
 
             entity.HasOne(d => d.IdCatEstatusNavigation).WithMany(p => p.Gastos)
                 .HasForeignKey(d => d.IdCatEstatus)
@@ -329,7 +351,7 @@ public partial class GacoDbContext : DbContext
             entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany(p => p.Gastos)
                 .HasForeignKey(d => d.IdUsuarioCreacion)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Gastos_UsuarioCreacion_Id");
+                .HasConstraintName("FK_Gastos_Usuarios_Id");
         });
 
         modelBuilder.Entity<GastosEmpresa>(entity =>
