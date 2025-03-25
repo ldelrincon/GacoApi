@@ -148,7 +148,7 @@ namespace ClbNegGestores
             int imageCount = 0; // Contador para rastrear imágenes en cada fila
             foreach (var objEvidencias in objReporteServicioResponse.Evidencias)
             {
-                if (objEvidencias.Extension.Contains("png") || objEvidencias.Extension.Contains("jpg"))
+                if (objEvidencias.Extension.Contains("png") || objEvidencias.Extension.Contains("jpg") || objEvidencias.Extension.Contains("jpeg"))
                 {
                     // Inicia una nueva fila si es la primera imagen o si ya hay dos imágenes en la fila anterior
                     if (imageCount % 2 == 0)
