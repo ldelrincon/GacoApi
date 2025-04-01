@@ -25,8 +25,8 @@ namespace gaco_api.Models.DTOs.Requests.ReporteSolicitudes
         public string? DescripcionProximaVisita { get; set; }
 
         // Mano de Obra.
-        public decimal MontoGasto { get; set; }
-        public decimal Porcentaje { get; set; }
-        public decimal MontoVenta { get; set; }
+        public decimal? MontoGasto { get; set; }
+        public decimal? Porcentaje { get; set; }
+        public decimal? MontoVenta { get; set; }
     }
 }
