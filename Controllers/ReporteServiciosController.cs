@@ -120,7 +120,7 @@ namespace gaco_api.Controllers
                     {
                         foreach (var item in item2.RelSeguimentoProductos)
                         {
-                            objReporteServicioResponse.Total += (item.Cantidad * item.MontoVenta);
+                            objReporteServicioResponse.Total +=  item.MontoVenta;
                             objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
                         }
                     }
@@ -833,6 +833,35 @@ namespace gaco_api.Controllers
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
                 .ToListAsync();
+
+            foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+            {
+                //primer seguimiento
+                var primerSeguimento = await _context.Seguimentos
+                 .Include(x => x.Evidencia)
+                 .Include(x => x.RelSeguimentoProductos)
+                 .ThenInclude(x => x.IdProductoNavigation).
+                 Where(x => x.IdReporteServicio == objReporteServicioResponse.Id)
+                .ToListAsync();
+
+                objReporteServicioResponse.Total = 0;
+                objReporteServicioResponse.TotalGasto = 0;
+                foreach (var item2 in primerSeguimento)
+                {
+                    foreach (var item in item2.RelSeguimentoProductos)
+                    {
+                        objReporteServicioResponse.Total += item.MontoVenta;
+                        objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                    }
+                }
+
+                objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
+                if (objReporteServicioResponse.Totalstr == null)
+                {
+                    objReporteServicioResponse.Totalstr = "$0.00";
+                }
+            }
 
             // Crear la respuesta
             var response = new DefaultResponse<List<ReporteServicioResponse>>
