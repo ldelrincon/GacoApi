@@ -60,6 +60,10 @@ namespace gaco_api.Controllers
                         && x.IdCatEstatus == 1
                     );
                 }
+                else
+                {
+                    query = query.Where(x => x.IdCatEstatus == 6);
+                }
 
                 if (request.CantidadPorPagina == -1)
                 {
@@ -116,7 +120,7 @@ namespace gaco_api.Controllers
                     {
                         foreach (var item in item2.RelSeguimentoProductos)
                         {
-                            objReporteServicioResponse.Total += (item.Cantidad * item.MontoVenta);
+                            objReporteServicioResponse.Total +=  item.MontoVenta;
                             objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
                         }
                     }
@@ -261,7 +265,6 @@ namespace gaco_api.Controllers
             {
                 var TargetCorreo = new ClsModCorreo();
                 //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
@@ -791,7 +794,7 @@ namespace gaco_api.Controllers
 
             query = query.Where(
                 x => 
-                 new int[] { 3, 4, 5 }.Contains(x.IdCatEstatus) 
+                 new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus) 
                 // && x.IdUsuarioCreacion == userId
             );
 
@@ -799,6 +802,8 @@ namespace gaco_api.Controllers
             {
                 request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
             }
+
+            var cultura = new System.Globalization.CultureInfo("es-ES");
 
             // Seleccionar y aplicar paginación
             var reporteServicios = await query
@@ -830,6 +835,35 @@ namespace gaco_api.Controllers
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
                 .ToListAsync();
+
+            foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+            {
+                //primer seguimiento
+                var primerSeguimento = await _context.Seguimentos
+                 .Include(x => x.Evidencia)
+                 .Include(x => x.RelSeguimentoProductos)
+                 .ThenInclude(x => x.IdProductoNavigation).
+                 Where(x => x.IdReporteServicio == objReporteServicioResponse.Id)
+                .ToListAsync();
+
+                objReporteServicioResponse.Total = 0;
+                objReporteServicioResponse.TotalGasto = 0;
+                foreach (var item2 in primerSeguimento)
+                {
+                    foreach (var item in item2.RelSeguimentoProductos)
+                    {
+                        objReporteServicioResponse.Total += item.MontoVenta;
+                        objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                    }
+                }
+
+                objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
+                if (objReporteServicioResponse.Totalstr == null)
+                {
+                    objReporteServicioResponse.Totalstr = "$0.00";
+                }
+            }
 
             // Crear la respuesta
             var response = new DefaultResponse<List<ReporteServicioResponse>>

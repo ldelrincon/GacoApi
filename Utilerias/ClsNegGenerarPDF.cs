@@ -39,7 +39,7 @@ namespace ClbNegGestores
                        : "Fecha no disponible";
                 foreach (var objProductos in objReporteServicioResponse.Productos)
                 {
-                    SubTotal += (objProductos.Cantidad * objProductos.MontoVenta);
+                    SubTotal += objProductos.MontoVenta;
                 }
                 Iva = SubTotal * .16m;
                 Total = SubTotal + Iva;
@@ -108,6 +108,7 @@ namespace ClbNegGestores
             sb.AppendLine("      <th>Producto</th>");
             sb.AppendLine("      <th>Cantidad</th>");
             sb.AppendLine("      <th>Precio</th>");
+            sb.AppendLine("      <th>Total</th>");
             sb.AppendLine("    </tr>");
             sb.AppendLine("  </thead>");
             sb.AppendLine("  <tbody>");
@@ -117,6 +118,7 @@ namespace ClbNegGestores
                 sb.AppendLine("    <tr>");
                 sb.AppendLine($"      <td>{objProductos.Producto}</td>");
                 sb.AppendLine($"      <td>{objProductos.Cantidad}</td>");
+                sb.AppendLine($"      <td>{(objProductos.MontoVenta/objProductos.Cantidad)?.ToString("C2")}</td>");
                 sb.AppendLine($"      <td>{objProductos.MontoVenta?.ToString("C2")}</td>");
                 //sb.AppendLine($"      <td>{persona.Edad}</td>");
                 sb.AppendLine("    </tr>");
