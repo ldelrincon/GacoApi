@@ -19,7 +19,10 @@ namespace gaco_api.Models.DTOs.Responses.ReporteSolicitudes
 
         public DateTime FechaCreacion { get; set; }
 
+        public string? strFechaCreacion { get; set; }
+
         public DateTime? FechaModificacion { get; set; }
+        public string? strFechaInicio {  get; set; }
 
         public int IdCatEstatus { get; set; }
 

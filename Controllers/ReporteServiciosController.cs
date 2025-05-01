@@ -794,7 +794,7 @@ namespace gaco_api.Controllers
 
             query = query.Where(
                 x => 
-                 new int[] { 3, 4, 5 }.Contains(x.IdCatEstatus) 
+                 new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus) 
                 // && x.IdUsuarioCreacion == userId
             );
 
@@ -802,6 +802,8 @@ namespace gaco_api.Controllers
             {
                 request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
             }
+
+            var cultura = new System.Globalization.CultureInfo("es-ES");
 
             // Seleccionar y aplicar paginación
             var reporteServicios = await query
