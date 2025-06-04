@@ -62,6 +62,7 @@ namespace gaco_api.Controllers
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
+                .OrderByDescending(request => request.Id)
                 .ToListAsync();
 
             // Crear la respuesta
