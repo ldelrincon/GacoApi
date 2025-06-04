@@ -52,6 +52,7 @@ namespace gaco_api.Controllers
             .Where(x => x.IdCatEstatus == 1)
             .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
             .Take(request.CantidadPorPagina)
+            .OrderByDescending(request => request.Id)
             .ToListAsync();
 
             return Ok(new DefaultResponse<List<GastoResponse>> { Success = true, Data = gastos });

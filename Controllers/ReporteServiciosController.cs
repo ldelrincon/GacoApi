@@ -102,6 +102,7 @@ namespace gaco_api.Controllers
                     })
                     .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                     .Take(request.CantidadPorPagina)
+                    .OrderByDescending(request => request.Id)
                     .ToListAsync();
 
                 foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
@@ -953,6 +954,7 @@ namespace gaco_api.Controllers
                 })
                 .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
                 .Take(request.CantidadPorPagina)
+                .OrderByDescending(request => request.Id)
                 .ToListAsync();
 
             foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
@@ -971,6 +973,10 @@ namespace gaco_api.Controllers
                 {
                     foreach (var item in item2.RelSeguimentoProductos)
                     {
+                        if (item.MontoGasto==null)
+                        {
+                            item.MontoGasto = item.MontoVenta;
+                        }
                         objReporteServicioResponse.Total += item.MontoVenta;
                         objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
                     }
