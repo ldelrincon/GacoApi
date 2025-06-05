@@ -1000,6 +1000,147 @@ namespace gaco_api.Controllers
             return Ok(response);
         }
 
+        // BusquedaSeguimentoActivoFiltros
+        [HttpPost]
+        [Route("BusquedaSeguimentoActivoFiltros")]
+        public async Task<IActionResult> BusquedaSeguimentoActivoFiltros(BusquedaReporteFiltrosServicioRequest request)
+        {
+            try
+            {
+                var query = _context.ReporteServicios
+                    .Include(x => x.IdClienteNavigation)
+                    .Include(x => x.IdCatEstatusNavigation).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(request.Busqueda.Cliente))
+                {
+                    query = query.Where(s => s.IdClienteNavigation.Nombre.Contains(request.Busqueda.Cliente));
+                }
+
+                if (request.Busqueda.FechaInicio.HasValue)
+                {
+                    query = query.Where(s => s.FechaCreacion >= request.Busqueda.FechaInicio.Value);
+                }
+
+                if (request.Busqueda.FechaFin.HasValue)
+                {
+                    query = query.Where(s => s.FechaCreacion <= request.Busqueda.FechaFin.Value);
+                }
+
+                // Obtener el ID del usuario conectado
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!long.TryParse(nameIdentifier, out long userId))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+
+                if (request.Busqueda.Estatus != null && request.Busqueda.Estatus != 0)
+                {
+                    query = query.Where(x => x.IdCatEstatus == request.Busqueda.Estatus);
+                }
+                else
+                {
+                    query = query.Where(x => new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus));
+                }
+
+                if (request.CantidadPorPagina == -1)
+                {
+                    request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
+                    if (request.Busqueda.Estatus != null && request.Busqueda.Estatus != 0)
+                    {
+                        request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == request.Busqueda.Estatus);
+                    }
+                    else
+                    {
+                        request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus));
+                    }
+                }
+
+                var cultura = new System.Globalization.CultureInfo("es-ES");
+
+                // Seleccionar y aplicar paginación
+                var reporteServicios = await query
+                    .Select(x => new ReporteServicioResponse
+                    {
+                        Id = x.Id,
+                        IdCatSolicitud = x.IdCatSolicitud,
+                        IdUsuarioCreacion = x.IdUsuarioCreacion,
+                        IdCliente = x.IdCliente,
+                        Titulo = x.Titulo,
+                        Descripcion = x.Descripcion,
+                        FechaCreacion = x.FechaCreacion,
+                        FechaModificacion = x.FechaModificacion,
+                        IdCatEstatus = x.IdCatEstatus,
+                        FechaInicio = x.FechaInicio,
+                        Accesorios = x.Accesorios,
+                        ServicioPreventivo = x.ServicioPreventivo,
+                        ServicioCorrectivo = x.ServicioCorrectivo,
+                        ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+                        // IdUsuarioTecnico = x.IdUsuarioTecnico,
+                        UsuarioEncargado = x.UsuarioEncargado,
+                        Estatus = x.IdCatEstatusNavigation.Estatus,
+                        UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+                        Cliente = x.IdClienteNavigation.Nombre,
+                        CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+                        // UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+                        UsuarioTecnico = x.UsuarioTecnico,
+                    })
+                    .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+                    .Take(request.CantidadPorPagina)
+                    .OrderByDescending(request => request.Id)
+                    .ToListAsync();
+
+                foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+                {
+                    //primer seguimiento
+                    var primerSeguimento = await _context.Seguimentos
+                     .Include(x => x.Evidencia)
+                     .Include(x => x.RelSeguimentoProductos)
+                     .ThenInclude(x => x.IdProductoNavigation).
+                     Where(x => x.IdReporteServicio == objReporteServicioResponse.Id)
+                    .ToListAsync();
+
+                    objReporteServicioResponse.Total = 0;
+                    objReporteServicioResponse.TotalGasto = 0;
+                    foreach (var item2 in primerSeguimento)
+                    {
+                        foreach (var item in item2.RelSeguimentoProductos)
+                        {
+                            if (item.MontoGasto == null)
+                            {
+                                item.MontoGasto = item.MontoVenta;
+                            }
+                            objReporteServicioResponse.Total += item.MontoVenta;
+                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                        }
+                    }
+
+                    objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+                    objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
+                    if (objReporteServicioResponse.Totalstr == null)
+                    {
+                        objReporteServicioResponse.Totalstr = "$0.00";
+                    }
+                }
+
+                // Crear la respuesta
+                var response = new DefaultResponse<List<ReporteServicioResponse>>
+                {
+                    Success = true,
+                    Data = reporteServicios,
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Ok(new DefaultResponse<List<ReporteServicioResponse>>
+                {
+                    Success = false,
+                    Message = ex.Message,
+                });
+            }
+        }
+
         [HttpPost]
         [Route("CambiarEstatusEnSeguimento")]
         public async Task<ActionResult> CambiarEstatus(CambiarEstatusEnSeguimentoRequest request)

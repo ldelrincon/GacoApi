@@ -551,6 +551,22 @@
   },
   {
     "ContainingType": "gaco_api.Controllers.ReporteServiciosController",
+    "Method": "BusquedaSeguimentoActivoFiltros",
+    "RelativePath": "api/ReporteServicios/BusquedaSeguimentoActivoFiltros",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "gaco_api.Models.DTOs.Requests.ReporteSolicitudes.BusquedaReporteFiltrosServicioRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "gaco_api.Controllers.ReporteServiciosController",
     "Method": "CambiarEstatus",
     "RelativePath": "api/ReporteServicios/CambiarEstatusEnSeguimento",
     "HttpMethod": "POST",
