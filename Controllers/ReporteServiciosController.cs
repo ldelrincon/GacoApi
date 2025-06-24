@@ -385,7 +385,7 @@ namespace gaco_api.Controllers
             {
                 var TargetCorreo = new ClsModCorreo();
                 //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
+                TargetCorreo.strFrom = "notificacioknes@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
 
@@ -973,9 +973,17 @@ namespace gaco_api.Controllers
                 {
                     foreach (var item in item2.RelSeguimentoProductos)
                     {
-                        if (item.MontoGasto==null)
+                        if (item.MontoGasto==null || item.MontoGasto==0)
                         {
-                            item.MontoGasto = item.MontoVenta;
+                            if (item.MontoVenta == null)
+                            {
+                                item.MontoGasto = 0;
+                                item.MontoVenta = 0;
+                            }
+                            else
+                            {
+                                item.MontoGasto = item.MontoVenta;
+                            }
                         }
                         objReporteServicioResponse.Total += item.MontoVenta;
                         objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);

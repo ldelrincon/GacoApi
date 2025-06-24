@@ -39,6 +39,10 @@ namespace ClbNegGestores
                        : "Fecha no disponible";
                 foreach (var objProductos in objReporteServicioResponse.Productos)
                 {
+                    if (objProductos.MontoVenta == null)
+                    {
+                        objProductos.MontoVenta = 0;
+                    }
                     SubTotal += objProductos.MontoVenta;
                 }
                 Iva = SubTotal * .16m;
