@@ -6,5 +6,7 @@
         public DateTime? FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
         public int? Estatus { get; set; }
+
+        public int? TipoSolicitud { get; set; }
     }
 }

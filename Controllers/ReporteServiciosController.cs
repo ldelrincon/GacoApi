@@ -48,6 +48,7 @@ namespace gaco_api.Controllers
                     .Include(x => x.IdCatEstatusNavigation)
                     .AsQueryable();
 
+               
                 // Filtrar si hay una búsqueda
                 if (!string.IsNullOrEmpty(request.Busqueda))
                 {
@@ -56,6 +57,7 @@ namespace gaco_api.Controllers
                         || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
                         || (x.IdUsuarioCreacionNavigation.Nombres + ' ' + x.IdUsuarioCreacionNavigation.Apellidos).Contains(request.Busqueda)
                         || x.UsuarioTecnico.Contains(request.Busqueda)
+                        
                         || x.IdClienteNavigation.Nombre.Contains(request.Busqueda)
                         && x.IdCatEstatus == 1
                     );
@@ -166,6 +168,10 @@ namespace gaco_api.Controllers
                 if (!string.IsNullOrWhiteSpace(request.Busqueda.Cliente))
                 {
                     query = query.Where(s => s.IdClienteNavigation.Nombre.Contains(request.Busqueda.Cliente));
+                }
+                if (request.Busqueda.TipoSolicitud != null && request.Busqueda.TipoSolicitud != 0)
+                {
+                    query = query.Where(x => x.IdCatSolicitud == request.Busqueda.TipoSolicitud);
                 }
 
                 if (request.Busqueda.FechaInicio.HasValue)
@@ -1017,6 +1023,7 @@ namespace gaco_api.Controllers
             {
                 var query = _context.ReporteServicios
                     .Include(x => x.IdClienteNavigation)
+                     
                     .Include(x => x.IdCatEstatusNavigation).AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(request.Busqueda.Cliente))
@@ -1039,6 +1046,10 @@ namespace gaco_api.Controllers
                 if (!long.TryParse(nameIdentifier, out long userId))
                 {
                     return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+                if (request.Busqueda.TipoSolicitud != null && request.Busqueda.TipoSolicitud != 0)
+                {
+                    query = query.Where(x => x.IdCatSolicitud == request.Busqueda.TipoSolicitud);
                 }
 
                 if (request.Busqueda.Estatus != null && request.Busqueda.Estatus != 0)
