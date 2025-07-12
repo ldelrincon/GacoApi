@@ -31,16 +31,26 @@ namespace gaco_api.Controllers
                 .Include(u => u.IdCatEstatusNavigation)
                 .AsQueryable();
 
-            // Filtrar si hay una búsqueda
-            if (!string.IsNullOrEmpty(request.Busqueda))
+            if (!string.IsNullOrWhiteSpace(request.Busqueda.Nombre))
             {
-                query = query.Where(u => u.Nombre.Contains(request.Busqueda)
-                    || u.RazonSocial.Contains(request.Busqueda)
-                    || u.Rfc.Contains(request.Busqueda)
-                    || u.Telefono.Contains(request.Busqueda)
-                    || u.Correo.Contains(request.Busqueda)
-                );
+                query = query.Where(s => s.Nombre.Contains(request.Busqueda.Nombre));
             }
+
+            if (!string.IsNullOrWhiteSpace(request.Busqueda.RFC))
+            {
+                query = query.Where(s => s.Rfc.Contains(request.Busqueda.RFC));
+            }
+
+            //// Filtrar si hay una búsqueda
+            //if (!string.IsNullOrEmpty(request.Busqueda))
+            //{
+            //    query = query.Where(u => u.Nombre.Contains(request.Busqueda)
+            //        || u.RazonSocial.Contains(request.Busqueda)
+            //        || u.Rfc.Contains(request.Busqueda)
+            //        || u.Telefono.Contains(request.Busqueda)
+            //        || u.Correo.Contains(request.Busqueda)
+            //    );
+            //}
 
             // Seleccionar y aplicar paginación
             var clientes = await query
