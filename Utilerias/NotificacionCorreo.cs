@@ -128,10 +128,11 @@ namespace gaco_api.Utilerias
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
             message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
-            message.Subject = "Seguimiento para facturación de cliente: "+ objReporteServicioResponse.Cliente;
+            message.Subject = "Seguimiento para facturación de cliente: "+ objReporteServicioResponse.Cliente+ "";
 
             // Crear el cuerpo del mensaje en formato HTML
-            var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
+            //var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
+            var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };
 
             // Adjuntar el archivo PDF
             //bodyBuilder.Attachments.Add(filePath);

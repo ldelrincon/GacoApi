@@ -391,7 +391,7 @@ namespace gaco_api.Controllers
             {
                 var TargetCorreo = new ClsModCorreo();
                 //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                TargetCorreo.strFrom = "notificacioknes@gaco.com.mx"; //help@zivo.com.mx
+                TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = string.Empty;
 
@@ -1297,7 +1297,7 @@ namespace gaco_api.Controllers
 
                             TargetCorreo.strSubject = "Servicio a facturar";
 
-                            TargetCorreo.strBody = "Servicio para facturación";
+                            TargetCorreo.strBody = request.strBody;
                             TargetCorreo.strPassword = "NotificacionesGACO1";
                             TargetCorreo.intPuerto = 587;
                             TargetCorreo.strHost = "smtp.ionos.com";
