@@ -781,7 +781,8 @@ namespace gaco_api.Controllers
 
                 // Validar y actualizar productos relacionados
                 var seguimiento = reporte.Seguimentos.FirstOrDefault();
-                if (seguimiento != null && request.Productos != null && request.Productos.Any())
+                //if (seguimiento != null && request.Productos != null && request.Productos.Any())
+                if (seguimiento != null)
                 {
                     var productosActuales = await _context.RelSeguimentoProductos
                         .Where(r => r.IdSeguimento == seguimiento.Id)
