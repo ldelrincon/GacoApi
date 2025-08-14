@@ -775,8 +775,26 @@ namespace gaco_api.Controllers
                 //reporte.IdUsuarioModificacion = userId;
                 reporte.FechaModificacion = DateTime.UtcNow;
                 reporte.UsuarioTecnico = request.UsuarioTecnico;
+                
 
                 _context.ReporteServicios.Update(reporte);
+                await _context.SaveChangesAsync();
+
+                //servicio
+
+                var primerSeguimiento = await _context.Seguimentos
+                  .FirstOrDefaultAsync(r => r.IdReporteServicio == request.Id);
+
+                //var primerSeguimiento = new Seguimento();
+                primerSeguimiento.IdReporteServicio = request.Id;
+                primerSeguimiento.DescripcionProximaVisita = request.DescripcionProximaVisita;
+                primerSeguimiento.ProximaVisita = request.ProximaVisita;
+                primerSeguimiento.Seguimento1 = "Primer Seguimiento";
+                primerSeguimiento.IdCatEstatus = 1;
+                primerSeguimiento.FechaModificacion = DateTime.Now;
+                primerSeguimiento.IdUsuario = userId;
+
+                _context.Seguimentos.Update(primerSeguimiento);
                 await _context.SaveChangesAsync();
 
                 // Validar y actualizar productos relacionados
