@@ -253,5 +253,44 @@ namespace gaco_api.Controllers
                     new DefaultResponse<object> { Message = ex.Message });
             }
         }
+
+        [HttpGet]
+        [Route("Activar/{id}")]
+        public async Task<ActionResult> Activar(long id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(DefaultResponse<List<string>>.FromModelState(ModelState));
+                }
+
+                // Buscar al cliente existente por su ID
+                var usuario = await _context.Usuarios.FindAsync(id);
+                if (usuario == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Message = "Usuario no encontrado." });
+                }
+
+                // Actualizar los datos del produto
+                usuario.IdCatEstatus = 1;
+                usuario.FechaModificacion = DateTime.Now;
+
+                // Guardar los cambios
+                _context.Usuarios.Update(usuario);
+                await _context.SaveChangesAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Usuario activado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
     }
 }
