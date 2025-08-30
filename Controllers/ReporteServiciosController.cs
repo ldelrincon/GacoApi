@@ -949,6 +949,7 @@ namespace gaco_api.Controllers
             }
 
             var cultura = new System.Globalization.CultureInfo("es-ES");
+           
 
             // Seleccionar y aplicar paginación
             var reporteServicios = await query
@@ -982,6 +983,8 @@ namespace gaco_api.Controllers
                 .OrderByDescending(request => request.Id)
                 .ToListAsync();
 
+            decimal? decGastoPrincipal = 0, decVentaPrincipal = 0;
+
             foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
             {
                 //primer seguimiento
@@ -1014,6 +1017,9 @@ namespace gaco_api.Controllers
                         objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
                     }
                 }
+                decGastoPrincipal += objReporteServicioResponse.TotalGasto;
+                decVentaPrincipal += objReporteServicioResponse.Total;
+
 
                 objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
                 objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
@@ -1023,11 +1029,147 @@ namespace gaco_api.Controllers
                 }
             }
 
+            
             // Crear la respuesta
             var response = new DefaultResponse<List<ReporteServicioResponse>>
             {
                 Success = true,
                 Data = reporteServicios,
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("TotalesSeguimentoActivo")]
+        public async Task<IActionResult> TotalesSeguimentoActivo(BusquedaGenericoRequest request)
+        {
+            // Obtener el ID del usuario conectado
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!long.TryParse(nameIdentifier, out long userId))
+            {
+                return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+            }
+
+            // Construir la misma consulta base
+            var query = _context.ReporteServicios
+                .Include(x => x.IdCatEstatusNavigation)
+                .AsQueryable();
+
+            query = query.Where(
+                x => new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus)
+            // && x.IdUsuarioCreacion == userId
+            );
+
+            // Traer IDs filtrados
+            var ids = await query.Select(x => x.Id).ToListAsync();
+
+            // Traer seguimientos de esos reportes en un solo query
+            var seguimientos = await _context.Seguimentos
+                .Include(x => x.RelSeguimentoProductos)
+                .Where(x => ids.Contains(x.IdReporteServicio))
+                .ToListAsync();
+
+            decimal totalVenta = 0;
+            decimal totalGasto = 0;
+            int TotalSolicitudes = 0, TotalTerminado=0, Totalfacturado=0, TotalPagado=0;
+            
+            TotalSolicitudes = ids.Count();
+
+            ///terminadas
+            
+            var queryterminadas = _context.ReporteServicios
+                .Include(x => x.IdCatEstatusNavigation)
+                .AsQueryable();
+            queryterminadas = queryterminadas.Where(
+              x => new int[] {5}.Contains(x.IdCatEstatus)
+          );
+
+            var idsterminadas = await queryterminadas.Select(x => x.Id).ToListAsync();
+            TotalTerminado = idsterminadas.Count();
+
+            ///Facturado
+            var queryfacturados = _context.ReporteServicios
+              .Include(x => x.IdCatEstatusNavigation)
+              .AsQueryable();
+            queryfacturados = queryfacturados.Where(
+              x => new int[] { 4 }.Contains(x.IdCatEstatus)
+          );
+
+            var idFacturado = await queryfacturados.Select(x => x.Id).ToListAsync();
+            Totalfacturado = idFacturado.Count();
+
+            //pagados
+            var querypagados = _context.ReporteServicios
+             .Include(x => x.IdCatEstatusNavigation)
+             .AsQueryable();
+            querypagados = querypagados.Where(
+             x => new int[] { 11 }.Contains(x.IdCatEstatus)
+         );
+
+            var idPagados = await querypagados.Select(x => x.Id).ToListAsync();
+            TotalPagado = idPagados.Count();
+
+
+            foreach (var seg in seguimientos)
+            {
+                foreach (var prod in seg.RelSeguimentoProductos)
+                {
+                    if (prod.MontoGasto == null || prod.MontoGasto == 0)
+                    {
+                        prod.MontoGasto = prod.MontoVenta ?? 0;
+                    }
+                    totalVenta += prod.MontoVenta ?? 0;
+                    totalGasto += (prod.Cantidad * (prod.MontoGasto ?? 0));
+                }
+            }
+
+            var top5Clientes = _context.Seguimentos
+                 .Include(s => s.IdReporteServicioNavigation)
+                     .ThenInclude(r => r.IdClienteNavigation) // incluye cliente
+                 .Include(s => s.RelSeguimentoProductos)
+                 .Where(s => s.IdReporteServicioNavigation.IdCliente != null)
+                 .AsEnumerable() // traemos a memoria para poder hacer multiplicaciones int*decimal
+                 .GroupBy(s => new {
+                     s.IdReporteServicioNavigation.IdCliente,
+                     ClienteNombre = s.IdReporteServicioNavigation.IdClienteNavigation?.Nombre ?? "Sin cliente"
+                 })
+                 .Select(g => new
+                 {
+                     IdCliente = g.Key.IdCliente,
+                     Cliente = g.Key.ClienteNombre,
+                     TotalVenta = g.SelectMany(s => s.RelSeguimentoProductos)
+                                   .Sum(p => p.MontoVenta ?? 0),
+                     TotalGasto = g.SelectMany(s => s.RelSeguimentoProductos)
+                                   .Sum(p => ((decimal)(p.Cantidad)) *
+                                             ((p.MontoGasto == null || p.MontoGasto == 0)
+                                                 ? (p.MontoVenta ?? 0)
+                                                 : p.MontoGasto.Value))
+                 })
+                 .OrderByDescending(c => c.TotalVenta) // ordenamos por venta descendente
+                 .Take(5) // los 5 primeros
+                 .ToList();
+
+
+
+            var cultura = new System.Globalization.CultureInfo("es-MX");
+
+            var response = new DefaultResponse<object>
+            {
+                Success = true,
+                Data = new
+                {
+                    TotalVenta = totalVenta,
+                    TotalGasto = totalGasto,
+                    TotalVentaStr = totalVenta.ToString("C2", cultura),
+                    TotalGastoStr = totalGasto.ToString("C2", cultura),
+                    TotalSolicitudes= TotalSolicitudes,
+                    TotalPagado= TotalPagado,
+                    Totalfacturado= Totalfacturado,
+                    TotalTerminado= TotalTerminado,
+                    top5Clientes= top5Clientes
+
+                }
             };
 
             return Ok(response);
