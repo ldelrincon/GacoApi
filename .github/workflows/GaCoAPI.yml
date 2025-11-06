@@ -220,6 +220,7 @@ jobs:
           # 8. Desplegar nuevos archivos
           echo "🚀 Deploying new version..."
           sshpass -p "$SSH_PASSWORD" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR" \
             --exclude='*.log' \
             --exclude='*.tmp' \
             --exclude='Evidencia/' \
