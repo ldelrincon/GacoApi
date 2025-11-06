@@ -192,7 +192,7 @@ jobs:
           if ssh_exec "[ -d '${{ env.DEPLOYMENT_PATH }}' ] && [ \"\$(ls -A ${{ env.DEPLOYMENT_PATH }})\" ]"; then
             ssh_exec "cd ${{ env.DEPLOYMENT_PATH }} && \
               7z a -t7z -mx=5 -mmt=on $BACKUP_FULL_PATH . \
-              -xr!*.log -xr!*.tmp -xr!Evidencia/ \
+              -xr!*.log -xr!*.tmp -xr!Evidencias/ \
               && echo 'Backup created: $BACKUP_FILE'"
           else
             echo "⚠️ No existing deployment found, skipping backup"
@@ -223,7 +223,7 @@ jobs:
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR" \
             --exclude='*.log' \
             --exclude='*.tmp' \
-            --exclude='Evidencia/' \
+            --exclude='Evidencias/' \
             --exclude='appsettings.*.json' \
             --progress \
             ${{ env.PUBLISH_PATH }}/ "$SSH_USERNAME@$SERVER_IP:${{ env.DEPLOYMENT_PATH }}/"
