@@ -130,6 +130,17 @@ namespace gaco_api.Utilerias
             message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
             message.Subject = "Seguimiento para facturación de cliente: "+ objReporteServicioResponse.Cliente+ "";
 
+            //  Agregar copia (CC)
+            if (!string.IsNullOrEmpty(Correo.strCC))
+            {
+                // Puedes agregar varios correos separados por coma
+                foreach (var cc in Correo.strCC.Split(',', ';'))
+                {
+                    var ccTrimmed = cc.Trim();
+                    if (!string.IsNullOrEmpty(ccTrimmed))
+                        message.Cc.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", ccTrimmed));
+                }
+            }
             // Crear el cuerpo del mensaje en formato HTML
             //var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
             var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };

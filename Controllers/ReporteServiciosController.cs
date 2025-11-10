@@ -391,9 +391,11 @@ namespace gaco_api.Controllers
             {
                 var TargetCorreo = new ClsModCorreo();
                 //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = "mgomez@gaco.mx";
+                //TargetCorreo.strCC = "luis.delrincon@nezter.com";
 
                 TargetCorreo.strSubject = "Servicio a facturar";
 
@@ -1455,6 +1457,7 @@ namespace gaco_api.Controllers
                             TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                             TargetCorreo.strFromNombre = string.Empty;
                             TargetCorreo.strCC = "mgomez@gaco.mx";
+                            //TargetCorreo.strCC = "luis.delrincon@nezter.com";
 
                             TargetCorreo.strSubject = "Servicio a facturar";
 
