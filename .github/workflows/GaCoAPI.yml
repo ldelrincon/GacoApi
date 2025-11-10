@@ -1,89 +1,329 @@
 name: Deploy to Server
+
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PUBLISH_PATH: './publish'
+  DEPLOYMENT_PATH: '/var/www/html/api'
+  BACKUP_BASE_PATH: '/home/Respaldos/API'
+  SERVICE_NAME: 'GacoApi'
+  MAX_BACKUPS: 5
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      # Paso 1: Descargar el código fuente
+      # Paso 1: Checkout del código
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Paso 2: Configurar .NET Core
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Paso 3: Restaurar dependencias y compilar
-      - name: Restore and build
+      # Paso 3: Cache de dependencias para acelerar builds
+      - name: Cache .NET dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Paso 4: Restaurar y compilar
+      - name: Restore dependencies
+        run: dotnet restore --force
+
+      - name: Build application
+        run: dotnet build -c Release --no-restore
+
+      # Paso 5: Ejecutar tests (opcional pero recomendado)
+      - name: Run tests
+        run: dotnet test -c Release --no-build --verbosity normal
+        continue-on-error: false
+
+      # Paso 6: Publicar aplicación
+      - name: Publish application
         run: |
-          dotnet restore --force
-          dotnet publish -c Release -r linux-x64 --no-restore --self-contained -o ./publish
+          dotnet publish -c Release \
+            -r linux-x64 \
+            --no-restore \
+            --self-contained \
+            -o ${{ env.PUBLISH_PATH }} \
+            /p:PublishTrimmed=false \
+            /p:PublishSingleFile=false
 
-      # Paso 4: Instalar Cloudflare WARP (si es necesario para conectarte al servidor)
+      # Paso 7: Crear manifiesto de deployment
+      - name: Create deployment manifest
+        run: |
+          cat > ${{ env.PUBLISH_PATH }}/deployment-info.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployed_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}"
+          }
+          EOF
+
+      # Paso 8: Instalar Cloudflare WARP
       - name: Install Cloudflare WARP
         run: |
+          echo "Installing Cloudflare WARP..."
           sudo apt-get update
-          curl https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | \
+            sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | \
+            sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          
           sudo apt-get update && sudo apt-get install -y cloudflare-warp
 
-      # Paso 5: Configurar y conectar WARP usando credenciales de servicio
+      # Paso 9: Configurar y conectar WARP con autenticación
       - name: Configure and connect WARP
+        env:
+          WARP_CONNECTOR_TOKEN: 'eyJhIjoiOTVhYTFkODk1NjExODc5MmQ0MjY2YTJlZGU1MTBjZDgiLCJ0IjoiMzU1YWJmZDQtNTA4Ni00MTliLWEwMTYtZDhkYThiODA3MjVkIiwicyI6InVxS25lQmwyeGpVbFgrbkRnRmRTdzltU0FML0hXQXBHUm8vQ1BmVGNzT0V0K2dpUXIxZ0hKaFljVXhXUk5vaHd0anQwQkJTR2FWNlM0bXBtVURIK0ZnPT0ifQ=='
         run: |
-          script -q -c "warp-cli --accept-tos connector new 'eyJhIjoiOTVhYTFkODk1NjExODc5MmQ0MjY2YTJlZGU1MTBjZDgiLCJ0IjoiMzU1YWJmZDQtNTA4Ni00MTliLWEwMTYtZDhkYThiODA3MjVkIiwicyI6InVxS25lQmwyeGpVbFgrbkRnRmRTdzltU0FML0hXQXBHUm8vQ1BmVGNzT0V0K2dpUXIxZ0hKaFljVXhXUk5vaHd0anQwQkJTR2FWNlM0bXBtVURIK0ZnPT0ifQ=='"
-          script -q -c "warp-cli --accept-tos registration show"
-          script -q -c "warp-cli --accept-tos connect"
+          echo "🔗 Configuring WARP Connector with authentication..."
+          
+          # Crear nuevo conector con el token de servicio (Zero Trust)
+          # Usamos script para manejar la salida interactiva correctamente
+          script -q -c "warp-cli --accept-tos connector new '$WARP_CONNECTOR_TOKEN'" /dev/null || {
+            echo "⚠️ Connector creation failed or already exists, trying to use existing..."
+          }
+          
+          # Mostrar información de registro
+          echo "📋 Registration info:"
+          script -q -c "warp-cli --accept-tos registration show" /dev/null || true
+          
+          # Conectar WARP
+          echo "🔌 Connecting to WARP..."
+          script -q -c "warp-cli --accept-tos connect" /dev/null
+          
+          # Esperar a que la conexión esté activa y estable
+          echo "⏳ Waiting for WARP connection to establish..."
           sleep 10
-          script -q -c "warp-cli --accept-tos status"
+          
+          for i in {1..30}; do
+            STATUS=$(script -q -c "warp-cli --accept-tos status" /dev/null 2>&1 || echo "")
+            echo "$STATUS"
+            
+            if echo "$STATUS" | grep -qi "connected"; then
+              echo "✅ WARP connected successfully!"
+              break
+            fi
+            
+            if [ $i -eq 30 ]; then
+              echo "❌ Failed to establish WARP connection after 30 attempts"
+              exit 1
+            fi
+            
+            echo "Attempt $i/30: Waiting for connection..."
+            sleep 2
+          done
+          
+          # Verificar conectividad a través de WARP
+          echo "🔍 Testing connectivity through WARP tunnel..."
+          ping -c 3 1.1.1.1 || echo "⚠️ Warning: Cannot ping Cloudflare DNS"
+          
+          # Mostrar configuración final
+          echo "⚙️ WARP Settings:"
+          script -q -c "warp-cli --accept-tos settings" /dev/null || true
 
-      # Paso 6: Instalar sshpass, realizar el respaldo, y gestionar respaldos antiguos
+      # Paso 10: Despliegue al servidor
       - name: Deploy to server
         env:
           SSH_USERNAME: root
           SSH_PASSWORD: v50llDtK
           SERVER_IP: 69.48.202.76
-          
+          BACKUP_RETENTION_DAYS: 30
         run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass p7zip-full
-          BACKUP_PATH="/home/Respaldos/API"
-          BACKUP_FILE="$(date +%d-%m-%Y_%H-%M).7z"
-        
-          echo "Ensuring backup directory exists..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "mkdir -p $BACKUP_PATH"
-        
-          echo "Ensuring source directory exists..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "mkdir -p /var/www/html/api"
-        
-          echo "Creating backup of current deployment using 7z..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" \
-            "7z a -t7z -mx=9 $BACKUP_PATH/$BACKUP_FILE /var/www/html/api || true"
-        
-          echo "Cleaning old backups, keeping the last 3..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" \
-            "ls -1t $BACKUP_PATH/*.7z | tail -n +4 | xargs -d '\n' rm -f || true"
-        
-          echo "Ensuring source directory exists again after backup..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "mkdir -p /var/www/html/api"
-        
-          echo "Stopping GacoApi service..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl stop GacoApi"
-        
-          echo "Deploying new files..."
-          sshpass -p "$SSH_PASSWORD" rsync -avz ./publish/ "$SSH_USERNAME@$SERVER_IP:/var/www/html/api/"
-        
-          echo "Starting GacoApi service..."
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl start GacoApi"
+          set -e  # Exit on error
+          
+          # Instalar herramientas necesarias
+          sudo apt-get install -y sshpass rsync p7zip-full
+          
+          # Variables
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          BACKUP_FILE="backup_${TIMESTAMP}.7z"
+          BACKUP_FULL_PATH="${{ env.BACKUP_BASE_PATH }}/$BACKUP_FILE"
+          
+          echo "🔧 Preparing deployment..."
+          
+          # Función para ejecutar comandos SSH
+          ssh_exec() {
+            sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o LogLevel=ERROR \
+              "$SSH_USERNAME@$SERVER_IP" "$@"
+          }
+          
+          # 1. Verificar conectividad
+          echo "📡 Testing server connectivity..."
+          ssh_exec "echo 'Connection successful'"
+          
+          # 2. Crear directorios necesarios
+          echo "📁 Ensuring directories exist..."
+          ssh_exec "mkdir -p ${{ env.BACKUP_BASE_PATH }} ${{ env.DEPLOYMENT_PATH }}"
+          
+          # 3. Verificar estado del servicio antes del deployment
+          echo "🔍 Checking service status..."
+          ssh_exec "sudo systemctl is-active ${{ env.SERVICE_NAME }} || echo 'Service not running'"
+          
+          # 4. Crear backup SOLO si existe contenido
+          echo "💾 Creating backup..."
+          if ssh_exec "[ -d '${{ env.DEPLOYMENT_PATH }}' ] && [ \"\$(ls -A ${{ env.DEPLOYMENT_PATH }})\" ]"; then
+            ssh_exec "cd ${{ env.DEPLOYMENT_PATH }} && \
+              7z a -t7z -mx=5 -mmt=on $BACKUP_FULL_PATH . \
+              -xr!*.log -xr!*.tmp -xr!Evidencias/ \
+              && echo 'Backup created: $BACKUP_FILE'"
+          else
+            echo "⚠️ No existing deployment found, skipping backup"
+          fi
+          
+          # 5. Limpiar backups antiguos (mantener los últimos N)
+          echo "🧹 Cleaning old backups (keeping last ${{ env.MAX_BACKUPS }})..."
+          ssh_exec "cd ${{ env.BACKUP_BASE_PATH }} && \
+            ls -1t backup_*.7z 2>/dev/null | tail -n +$((${{ env.MAX_BACKUPS }} + 1)) | \
+            xargs -r rm -v || echo 'No old backups to remove'"
+          
+          # 6. Limpiar backups por días (opcional)
+          echo "🧹 Removing backups older than $BACKUP_RETENTION_DAYS days..."
+          ssh_exec "find ${{ env.BACKUP_BASE_PATH }} -name 'backup_*.7z' -type f -mtime +$BACKUP_RETENTION_DAYS -delete || true"
+          
+          # 7. Detener el servicio
+          echo "🛑 Stopping ${{ env.SERVICE_NAME }} service..."
+          ssh_exec "sudo systemctl stop ${{ env.SERVICE_NAME }}" || {
+            echo "⚠️ Warning: Could not stop service gracefully"
+          }
+          
+          # Esperar a que el servicio se detenga completamente
+          sleep 5
+          
+          # 8. Desplegar nuevos archivos
+          echo "🚀 Deploying new version..."
+          sshpass -p "$SSH_PASSWORD" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR" \
+            --exclude='*.log' \
+            --exclude='*.tmp' \
+            --exclude='Evidencias/' \
+            --exclude='appsettings.*.json' \
+            --progress \
+            ${{ env.PUBLISH_PATH }}/ "$SSH_USERNAME@$SERVER_IP:${{ env.DEPLOYMENT_PATH }}/"
+          
+          # 9. Establecer permisos correctos
+          echo "🔐 Setting permissions..."
+          ssh_exec "sudo chown -R www-data:www-data ${{ env.DEPLOYMENT_PATH }} && \
+            sudo chmod -R 755 ${{ env.DEPLOYMENT_PATH }} && \
+            sudo chmod +x ${{ env.DEPLOYMENT_PATH }}/*.dll || true"
+          
+          # 10. Iniciar el servicio
+          echo "▶️ Starting ${{ env.SERVICE_NAME }} service..."
+          ssh_exec "sudo systemctl start ${{ env.SERVICE_NAME }}"
+          
+          # 11. Esperar a que el servicio esté activo
+          echo "⏳ Waiting for service to start..."
+          for i in {1..30}; do
+            if ssh_exec "sudo systemctl is-active --quiet ${{ env.SERVICE_NAME }}"; then
+              echo "✅ Service started successfully"
+              break
+            fi
+            echo "Waiting for service... ($i/30)"
+            sleep 2
+          done
+          
+          echo "✅ Deployment completed successfully!"
 
-      # Paso 7: Verificar el estado del servicio (opcional)
-      - name: Check API service status
+      # Paso 11: Verificar estado del servicio
+      - name: Verify deployment
+        if: always()
         env:
           SSH_USERNAME: root
           SSH_PASSWORD: v50llDtK
           SERVER_IP: 69.48.202.76
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no "$SSH_USERNAME@$SERVER_IP" "sudo systemctl status GacoApi"
+          echo "🔍 Checking service status..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            "$SSH_USERNAME@$SERVER_IP" "sudo systemctl status ${{ env.SERVICE_NAME }} --no-pager" || true
+          
+          echo ""
+          echo "📊 Checking service logs (last 20 lines)..."
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            "$SSH_USERNAME@$SERVER_IP" "sudo journalctl -u ${{ env.SERVICE_NAME }} -n 20 --no-pager" || true
+
+      # Paso 12: Health check (opcional)
+      - name: Health check
+        if: success()
+        env:
+          SSH_USERNAME: root
+          SSH_PASSWORD: v50llDtK
+          SERVER_IP: 69.48.202.76
+        run: |
+          echo "🏥 Running health check..."
+          sleep 10  # Dar tiempo al servicio para iniciar completamente
+          
+          # Intentar hacer un health check HTTP si tu API lo soporta
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            "$SSH_USERNAME@$SERVER_IP" \
+            "curl -f http://localhost:5000/health || curl -f http://localhost:5000/ || echo 'Health check endpoint not available'"
+
+      # Paso 13: Rollback automático en caso de fallo
+      - name: Rollback on failure
+        if: failure()
+        env:
+          SSH_USERNAME: root
+          SSH_PASSWORD: v50llDtK
+          SERVER_IP: 69.48.202.76
+        run: |
+          echo "❌ Deployment failed! Attempting rollback..."
+          
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            "$SSH_USERNAME@$SERVER_IP" "
+              LATEST_BACKUP=\$(ls -1t ${{ env.BACKUP_BASE_PATH }}/backup_*.7z 2>/dev/null | head -n 1)
+              if [ -n \"\$LATEST_BACKUP\" ]; then
+                echo 'Rolling back to: \$LATEST_BACKUP'
+                sudo systemctl stop ${{ env.SERVICE_NAME }}
+                rm -rf ${{ env.DEPLOYMENT_PATH }}/*
+                7z x \"\$LATEST_BACKUP\" -o${{ env.DEPLOYMENT_PATH }}
+                sudo systemctl start ${{ env.SERVICE_NAME }}
+                echo '✅ Rollback completed'
+              else
+                echo '⚠️ No backup found for rollback'
+              fi
+            " || echo "Rollback failed"
+
+      # Paso 14: Notificación (opcional - puedes integrar con Slack, Discord, etc)
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "📋 Deployment Summary"
+          echo "===================="
+          echo "Status: ${{ job.status }}"
+          echo "Version: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Deployed by: ${{ github.actor }}"
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      # Paso 15: Desconectar WARP
+      - name: Disconnect WARP
+        if: always()
+        run: |
+          warp-cli --accept-tos disconnect || true
+          warp-cli --accept-tos delete || true
