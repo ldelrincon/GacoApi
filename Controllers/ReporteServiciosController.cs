@@ -923,38 +923,155 @@ namespace gaco_api.Controllers
             }
         }
 
+        //[HttpPost]
+        //[Route("BusquedaSeguimentoActivo")]
+        //public async Task<IActionResult> BusquedaSeguimentoActivo(BusquedaGenericoRequest request)
+        //{
+        //    // Obtener el ID del usuario conectado
+        //    var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    if (!long.TryParse(nameIdentifier, out long userId))
+        //    {
+        //        return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+        //    }
+
+        //    // Construir la consulta inicial
+        //    var query = _context.ReporteServicios
+        //        .Include(x => x.IdCatEstatusNavigation)
+        //        .AsQueryable();
+
+        //    query = query.Where(
+        //        x => 
+        //         new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus) 
+        //        // && x.IdUsuarioCreacion == userId
+        //    );
+
+        //    if (request.CantidadPorPagina == -1)
+        //    {
+        //        request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
+        //    }
+
+        //    var cultura = new System.Globalization.CultureInfo("es-ES");
+
+
+        //    // Seleccionar y aplicar paginación
+        //    var reporteServicios = await query
+        //        .Select(x => new ReporteServicioResponse
+        //        {
+        //            Id = x.Id,
+        //            IdCatSolicitud = x.IdCatSolicitud,
+        //            IdUsuarioCreacion = x.IdUsuarioCreacion,
+        //            IdCliente = x.IdCliente,
+        //            Titulo = x.Titulo,
+        //            Descripcion = x.Descripcion,
+        //            FechaCreacion = x.FechaCreacion,
+        //            FechaModificacion = x.FechaModificacion,
+        //            IdCatEstatus = x.IdCatEstatus,
+        //            FechaInicio = x.FechaInicio,
+        //            Accesorios = x.Accesorios,
+        //            ServicioPreventivo = x.ServicioPreventivo,
+        //            ServicioCorrectivo = x.ServicioCorrectivo,
+        //            ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
+        //            // IdUsuarioTecnico = x.IdUsuarioTecnico,
+        //            UsuarioEncargado = x.UsuarioEncargado,
+        //            Estatus = x.IdCatEstatusNavigation.Estatus,
+        //            UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+        //            Cliente = x.IdClienteNavigation.Nombre,
+        //            CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
+        //            // UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
+        //            UsuarioTecnico = x.UsuarioTecnico,
+        //        })
+        //        .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+        //        .Take(request.CantidadPorPagina)
+        //        .OrderByDescending(request => request.Id)
+        //        .ToListAsync();
+
+        //    decimal? decGastoPrincipal = 0, decVentaPrincipal = 0;
+
+        //    foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+        //    {
+        //        //primer seguimiento
+        //        var primerSeguimento = await _context.Seguimentos
+        //         .Include(x => x.Evidencia)
+        //         .Include(x => x.RelSeguimentoProductos)
+        //         .ThenInclude(x => x.IdProductoNavigation).
+        //         Where(x => x.IdReporteServicio == objReporteServicioResponse.Id)
+        //        .ToListAsync();
+
+        //        objReporteServicioResponse.Total = 0;
+        //        objReporteServicioResponse.TotalGasto = 0;
+        //        foreach (var item2 in primerSeguimento)
+        //        {
+        //            foreach (var item in item2.RelSeguimentoProductos)
+        //            {
+        //                if (item.MontoGasto==null || item.MontoGasto==0)
+        //                {
+        //                    if (item.MontoVenta == null)
+        //                    {
+        //                        item.MontoGasto = 0;
+        //                        item.MontoVenta = 0;
+        //                    }
+        //                    else
+        //                    {
+        //                        item.MontoGasto = item.MontoVenta;
+        //                    }
+        //                }
+        //                objReporteServicioResponse.Total += item.MontoVenta;
+        //                objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+        //            }
+        //        }
+        //        decGastoPrincipal += objReporteServicioResponse.TotalGasto;
+        //        decVentaPrincipal += objReporteServicioResponse.Total;
+
+
+        //        objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
+        //        objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
+        //        if (objReporteServicioResponse.Totalstr == null)
+        //        {
+        //            objReporteServicioResponse.Totalstr = "$0.00";
+        //        }
+        //    }
+
+
+        //    // Crear la respuesta
+        //    var response = new DefaultResponse<List<ReporteServicioResponse>>
+        //    {
+        //        Success = true,
+        //        Data = reporteServicios,
+        //    };
+
+        //    return Ok(response);
+        //}
+
         [HttpPost]
         [Route("BusquedaSeguimentoActivo")]
         public async Task<IActionResult> BusquedaSeguimentoActivo(BusquedaGenericoRequest request)
         {
-            // Obtener el ID del usuario conectado
             var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!long.TryParse(nameIdentifier, out long userId))
             {
-                return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                return Conflict(new DefaultResponse<object>
+                {
+                    Message = "No se tiene permisos para esta acción."
+                });
             }
 
-            // Construir la consulta inicial
-            var query = _context.ReporteServicios
-                .Include(x => x.IdCatEstatusNavigation)
-                .AsQueryable();
+            var estatusValidos = new[] { 3, 4, 5, 7, 8, 9, 11 };
 
-            query = query.Where(
-                x => 
-                 new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus) 
-                // && x.IdUsuarioCreacion == userId
-            );
+            // ================= QUERY BASE =================
+            var baseQuery = _context.ReporteServicios
+                .Where(x => estatusValidos.Contains(x.IdCatEstatus));
+
+            // Total real para paginación
+            var totalRegistros = await baseQuery.CountAsync();
 
             if (request.CantidadPorPagina == -1)
-            {
-                request.CantidadPorPagina = await _context.ReporteServicios.CountAsync(x => x.IdCatEstatus == 1);
-            }
+                request.CantidadPorPagina = totalRegistros;
 
-            var cultura = new System.Globalization.CultureInfo("es-ES");
-           
-
-            // Seleccionar y aplicar paginación
-            var reporteServicios = await query
+            // ================= PAGINA CORRECTA =================
+            var pagina = await baseQuery
+                .OrderByDescending(x => x.Id)
+                .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
+                .Take(request.CantidadPorPagina)
                 .Select(x => new ReporteServicioResponse
                 {
                     Id = x.Id,
@@ -971,75 +1088,63 @@ namespace gaco_api.Controllers
                     ServicioPreventivo = x.ServicioPreventivo,
                     ServicioCorrectivo = x.ServicioCorrectivo,
                     ObservacionesRecomendaciones = x.ObservacionesRecomendaciones,
-                    // IdUsuarioTecnico = x.IdUsuarioTecnico,
                     UsuarioEncargado = x.UsuarioEncargado,
                     Estatus = x.IdCatEstatusNavigation.Estatus,
-                    UsuarioCreacion = (x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos),
+                    UsuarioCreacion = x.IdUsuarioCreacionNavigation.Nombres + " " + x.IdUsuarioCreacionNavigation.Apellidos,
                     Cliente = x.IdClienteNavigation.Nombre,
                     CatSolicitud = x.IdCatSolicitudNavigation.TipoSolicitud,
-                    // UsuarioTecnico = (x.IdUsuarioTecnicoNavigation.Nombres + " " + x.IdUsuarioTecnicoNavigation.Apellidos),
                     UsuarioTecnico = x.UsuarioTecnico,
                 })
-                .Skip((request.NumeroPagina - 1) * request.CantidadPorPagina)
-                .Take(request.CantidadPorPagina)
-                .OrderByDescending(request => request.Id)
                 .ToListAsync();
 
-            decimal? decGastoPrincipal = 0, decVentaPrincipal = 0;
+            // ================= TOTALES EN UNA SOLA CONSULTA (SIN LIMITE 100) =================
+            var ids = pagina.Select(x => x.Id).ToList();
 
-            foreach (ReporteServicioResponse objReporteServicioResponse in reporteServicios)
+            var totales = await _context.Seguimentos
+                .Where(s => ids.Contains(s.IdReporteServicio))
+                .SelectMany(s => s.RelSeguimentoProductos.Select(p => new
+                {
+                    s.IdReporteServicio,
+                    p.MontoVenta,
+                    p.MontoGasto,
+                    p.Cantidad
+                }))
+                .GroupBy(x => x.IdReporteServicio)
+                .Select(g => new
+                {
+                    IdReporteServicio = g.Key,
+                    TotalVenta = g.Sum(x => x.MontoVenta ?? 0),
+                    TotalGasto = g.Sum(x =>
+                        x.Cantidad *
+                        (x.MontoGasto == null || x.MontoGasto == 0
+                            ? (x.MontoVenta ?? 0)
+                            : x.MontoGasto.Value))
+                })
+                .ToDictionaryAsync(x => x.IdReporteServicio);
+
+            // ================= ASIGNAR TOTALES SIN CONSULTAS =================
+            foreach (var item in pagina)
             {
-                //primer seguimiento
-                var primerSeguimento = await _context.Seguimentos
-                 .Include(x => x.Evidencia)
-                 .Include(x => x.RelSeguimentoProductos)
-                 .ThenInclude(x => x.IdProductoNavigation).
-                 Where(x => x.IdReporteServicio == objReporteServicioResponse.Id)
-                .ToListAsync();
-
-                objReporteServicioResponse.Total = 0;
-                objReporteServicioResponse.TotalGasto = 0;
-                foreach (var item2 in primerSeguimento)
+                if (totales.TryGetValue(item.Id, out var total))
                 {
-                    foreach (var item in item2.RelSeguimentoProductos)
-                    {
-                        if (item.MontoGasto==null || item.MontoGasto==0)
-                        {
-                            if (item.MontoVenta == null)
-                            {
-                                item.MontoGasto = 0;
-                                item.MontoVenta = 0;
-                            }
-                            else
-                            {
-                                item.MontoGasto = item.MontoVenta;
-                            }
-                        }
-                        objReporteServicioResponse.Total += item.MontoVenta;
-                        objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
-                    }
+                    item.Total = total.TotalVenta;
+                    item.TotalGasto = total.TotalGasto;
                 }
-                decGastoPrincipal += objReporteServicioResponse.TotalGasto;
-                decVentaPrincipal += objReporteServicioResponse.Total;
-
-
-                objReporteServicioResponse.Totalstr = objReporteServicioResponse.Total?.ToString("C2");
-                objReporteServicioResponse.TotalGastostr = objReporteServicioResponse.TotalGasto?.ToString("C2");
-                if (objReporteServicioResponse.Totalstr == null)
+                else
                 {
-                    objReporteServicioResponse.Totalstr = "$0.00";
+                    item.Total = 0;
+                    item.TotalGasto = 0;
                 }
+
+                item.Totalstr = item.Total?.ToString("C2");
+                item.TotalGastostr = item.TotalGasto?.ToString("C2");
             }
 
-            
-            // Crear la respuesta
-            var response = new DefaultResponse<List<ReporteServicioResponse>>
+            return Ok(new DefaultResponse<List<ReporteServicioResponse>>
             {
                 Success = true,
-                Data = reporteServicios,
-            };
-
-            return Ok(response);
+                Data = pagina
+            });
         }
 
         [HttpPost]
