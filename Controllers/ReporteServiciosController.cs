@@ -1055,7 +1055,7 @@ namespace gaco_api.Controllers
                 });
             }
 
-            var estatusValidos = new[] { 3, 4, 5, 7, 8, 9, 11 };
+            var estatusValidos = new[] { 3, 4, 5, 7, 8, 9, 10, 11, 12 };
 
             // ================= QUERY BASE =================
             var baseQuery = _context.ReporteServicios
@@ -1326,7 +1326,7 @@ namespace gaco_api.Controllers
                 }
                 else
                 {
-                    query = query.Where(x => new int[] { 3, 4, 5, 7, 8, 9, 11 }.Contains(x.IdCatEstatus));
+                    query = query.Where(x => new int[] { 3, 4, 5, 7, 8, 9, 10, 11, 12 }.Contains(x.IdCatEstatus));
                 }
 
                 if (request.CantidadPorPagina == -1)
