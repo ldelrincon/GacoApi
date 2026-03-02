@@ -390,8 +390,8 @@ namespace gaco_api.Controllers
             try
             {
                 var TargetCorreo = new ClsModCorreo();
-                //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                //TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                 TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                 TargetCorreo.strFromNombre = string.Empty;
                 TargetCorreo.strCC = "mgomez@gaco.com.mx";
@@ -404,8 +404,14 @@ namespace gaco_api.Controllers
                 TargetCorreo.intPuerto = 587;
                 TargetCorreo.strHost = "smtp.ionos.com";
                 TargetCorreo.usaSSL = false;
-
-                _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                if (reporteServicios.IdCatSolicitud != 2)
+                {
+                    _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                }
+                else
+                {
+                    _NotificacionCorreo.SendProyecto(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                }
             }
             catch (Exception ex)
             {
@@ -589,6 +595,8 @@ namespace gaco_api.Controllers
                 //}
 
                 // Crear el nuevo reporte de servicio
+        
+                
                 var nuevo = new ReporteServicio
                 {
                     IdCatSolicitud = request.IdCatSolicitud,
@@ -603,8 +611,8 @@ namespace gaco_api.Controllers
                     ServicioCorrectivo = request.ServicioCorrectivo,
                     ObservacionesRecomendaciones = request.ObservacionesRecomendaciones,
                     // IdUsuarioTecnico = request.IdUsuarioTecnico,
-                    UsuarioTecnico = request.UsuarioTecnico,
-                    UsuarioEncargado = request.UsuarioEncargado,
+                    UsuarioTecnico = request.UsuarioTecnico ??"",
+                    UsuarioEncargado = request.UsuarioEncargado ??"",
                 };
                 await _context.ReporteServicios.AddAsync(nuevo);
                 await _context.SaveChangesAsync();
@@ -771,12 +779,12 @@ namespace gaco_api.Controllers
                 reporte.ServicioPreventivo = request.ServicioPreventivo;
                 reporte.ServicioCorrectivo = request.ServicioCorrectivo;
                 reporte.ObservacionesRecomendaciones = request.ObservacionesRecomendaciones;
-                reporte.UsuarioEncargado = request.UsuarioEncargado;
+                reporte.UsuarioEncargado = request.UsuarioEncargado ??"";
                 reporte.FechaInicio = request.FechaInicio;
                 reporte.Accesorios = request.Accesorios;
                 //reporte.IdUsuarioModificacion = userId;
                 reporte.FechaModificacion = DateTime.UtcNow;
-                reporte.UsuarioTecnico = request.UsuarioTecnico;
+                reporte.UsuarioTecnico = request.UsuarioTecnico ??"";
                 
 
                 _context.ReporteServicios.Update(reporte);
@@ -1557,8 +1565,8 @@ namespace gaco_api.Controllers
                         try
                         {
                             var TargetCorreo = new ClsModCorreo();
-                            //TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
-                            TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
+                            TargetCorreo.strTo = "luisdelrincon7@gmail.com"; //correo usuario
+                            //TargetCorreo.strTo = "pagos@gaco.com.mx"; //correo usuario
                             TargetCorreo.strFrom = "notificaciones@gaco.com.mx"; //help@zivo.com.mx
                             TargetCorreo.strFromNombre = string.Empty;
                             TargetCorreo.strCC = "mgomez@gaco.com.mx";
@@ -1571,8 +1579,14 @@ namespace gaco_api.Controllers
                             TargetCorreo.intPuerto = 587;
                             TargetCorreo.strHost = "smtp.ionos.com";
                             TargetCorreo.usaSSL = false;
-
-                            _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                            if (reporteServicios.IdCatSolicitud != 2)
+                            {
+                                _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                            }
+                            else
+                            {
+                                _NotificacionCorreo.SendProyecto(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                            }
                         }
                         catch (Exception ex)
                         {

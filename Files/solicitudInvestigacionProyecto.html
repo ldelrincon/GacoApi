@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reporte de Servicio</title>
+    <style>
+        .page-break {
+            page-break-before: always; /* Fuerza el salto de página antes */
+            break-before: page; /* Compatibilidad con navegadores modernos */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .logo {
+            text-align: center;
+        }
+
+        .signature {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td colspan="2" class="logo">
+                <a target="_blank">
+                    <img id="RutaCorreosNezterLoanding" src="" alt="" width="180"
+                         style="display: block; border: 0; outline: none; text-decoration: none;" />
+                </a>
+            </td>
+            <td colspan="2">
+                <strong>No:</strong> <span id="NoServicio"></span><br />
+                <strong>Fecha:</strong> <span id="FechaInicio"></span>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4" style="text-align:center"><h3>Reporte de Servicio</h3></th>
+        </tr>
+        <tr>
+            <th>Cliente:</th>
+            <td colspan="3"><span id="Cliente"></span></td>
+        </tr>
+        <tr>
+            <th>Teléfono:</th>
+            <td><span id="Telefono"></span></td>
+            <th>Correo:</th>
+            <td><span id="Correo"></span></td>
+        </tr>
+
+        <tr>
+            <th>Razón Social:</th>
+            <td><span id="RazonSocial"></span></td>
+            <th>Régimen Fiscal:</th>
+            <td><span id="RegimenFiscal"></span></td>
+        </tr>
+        <tr>
+            <th>Dirección:</th>
+            <td colspan="3"><span id="Direccion"></span></td>
+        </tr>
+        <tr>
+            <th>Mano de obra:</th>
+            <td colspan="3"><span id="DatosEquipo"></span></td>
+        </tr>
+        <tr>
+            <th>Materiales:</th>
+            <td colspan="3"><span id="Accesorios"></span></td>
+        </tr>
+        
+        <tr style="height: 50px;">
+            <!-- Ajusta la altura -->
+            <th style="padding: 10px;">Trabajo Realizado:</th>
+            <td colspan="3" style="padding: 10px;">
+                <span id="TrabajoRealizado" style="padding: 10px;"></span>
+            </td>
+        </tr>
+        <!--<tr>
+        <th>Trabajo Realizado:</th>
+        <td colspan="3"><span id="TrabajoRealizado"></span></td>
+    </tr>-->
+        <tr>
+            <th>Materiales Utilizados:</th>
+            <td colspan="3"><span id="Productos"></span></td>
+        </tr>
+        <tr>
+            <th>Observaciones y Recomendaciones:</th>
+            <td colspan="3"><span id="Observaciones"></span></td>
+        </tr>
+     
+    </table>
+  
+    <br />
+    <br />
+   
+    <div style="float: right; text-align: right;">
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>SubTotal:</strong><span id="SubTotal">$100.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>IVA:</strong><span id="Iva">$16.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; width: 300px;">
+            <strong>Total:</strong><span id="Total">$116.00</span>
+        </div>
+    </div>
+    <div class="page-break"></div>
+    <div id="Imagenes"></div>
+</body>
+</html>

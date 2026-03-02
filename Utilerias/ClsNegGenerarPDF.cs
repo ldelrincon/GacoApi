@@ -100,6 +100,82 @@ namespace ClbNegGestores
             return htmlString;
         }
 
+        public string ExportPDFPlantillaSolicitudInvestigacionProyectopdf(string Folio, string Path, string srcImage, ReporteServicioResponse objReporteServicioResponse)
+        {
+            HtmlDocument doc2 = new HtmlDocument();
+
+            // Crear el objeto para la conversión
+            var converter = new BasicConverter(new PdfTools());
+            string htmlString = "";
+            byte[] pdf = null;
+            string strTablaProductos = GenerarTablaHtml(objReporteServicioResponse);
+            string strTablaEvidencias = GenerarTablaHtmlImagenes(objReporteServicioResponse);
+            string base64 = "";
+            try
+            {
+                //saca los montos para factura
+                decimal? SubTotal = 0, Iva = 0, Total = 0, IvaAplicado = 0;
+                string textoFechaInicio = objReporteServicioResponse.FechaInicio.HasValue
+                  ? objReporteServicioResponse.FechaInicio.Value.ToString("dd/MM/yyyy") // Convertir con el formato deseado
+                       : "Fecha no disponible";
+
+                foreach (var objProductos in objReporteServicioResponse.Productos)
+                {
+                    if (objProductos.MontoVenta == null)
+                    {
+                        objProductos.MontoVenta = 0;
+                    }
+                    SubTotal += objProductos.MontoVenta;
+                }
+                Iva = SubTotal * .16m;
+                Total = SubTotal + Iva;
+
+
+
+                string RutaCorreosNezterLoanding = srcImage;
+                doc2.Load(Path);
+                string strPreventivo = "No", strCorrectivo = "No";
+                if (objReporteServicioResponse.ServicioPreventivo == true)
+                {
+                    strPreventivo = "Si";
+                }
+                if (objReporteServicioResponse.ServicioCorrectivo == true)
+                {
+                    strCorrectivo = "Si";
+                }
+                doc2.GetElementbyId("NoServicio").InnerHtml = "S" + objReporteServicioResponse.Id.ToString();
+                doc2.GetElementbyId("FechaInicio").InnerHtml = textoFechaInicio;
+                doc2.GetElementbyId("Cliente").InnerHtml = objReporteServicioResponse.Cliente;
+                doc2.GetElementbyId("Telefono").InnerHtml = objReporteServicioResponse.Telefono;
+                doc2.GetElementbyId("Correo").InnerHtml = objReporteServicioResponse.Correo;
+                doc2.GetElementbyId("RazonSocial").InnerHtml = objReporteServicioResponse.RazonSocial;
+                doc2.GetElementbyId("Direccion").InnerHtml = objReporteServicioResponse.Direccion + " C.P:" + objReporteServicioResponse.CodigoPostal;
+                doc2.GetElementbyId("DatosEquipo").InnerHtml = objReporteServicioResponse.Titulo;
+                doc2.GetElementbyId("Accesorios").InnerHtml = objReporteServicioResponse.Accesorios;
+                doc2.GetElementbyId("TrabajoRealizado").InnerHtml = objReporteServicioResponse.Descripcion.Replace("\n \t", "<br>");
+                doc2.GetElementbyId("Observaciones").InnerHtml = objReporteServicioResponse.ObservacionesRecomendaciones;
+                doc2.GetElementbyId("RegimenFiscal").InnerHtml = objReporteServicioResponse.RegimenFiscal;
+                doc2.GetElementbyId("Productos").InnerHtml = strTablaProductos;
+                doc2.GetElementbyId("Imagenes").InnerHtml = strTablaEvidencias;
+
+                doc2.GetElementbyId("SubTotal").InnerHtml = SubTotal?.ToString("C2") ?? "$0.00";
+                doc2.GetElementbyId("Iva").InnerHtml = Iva?.ToString("C2") ?? "$0.00";
+                doc2.GetElementbyId("Total").InnerHtml = Total?.ToString("C2") ?? "$0.00";
+
+
+                doc2.GetElementbyId("RutaCorreosNezterLoanding").SetAttributeValue("src", RutaCorreosNezterLoanding);
+                htmlString = doc2.DocumentNode.OuterHtml;
+
+            }
+            catch (Exception ex)
+            {
+
+                _ = ex.Message;
+            }
+
+            return htmlString;
+        }
+
         static string GenerarTablaHtml(ReporteServicioResponse objReporteServicioResponse)
         {
             var sb = new StringBuilder();
