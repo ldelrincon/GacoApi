@@ -782,6 +782,7 @@ namespace gaco_api.Controllers
                 reporte.UsuarioEncargado = request.UsuarioEncargado ??"";
                 reporte.FechaInicio = request.FechaInicio;
                 reporte.Accesorios = request.Accesorios;
+                reporte.IdCatSolicitud = request.IdCatSolicitud;
                 //reporte.IdUsuarioModificacion = userId;
                 reporte.FechaModificacion = DateTime.UtcNow;
                 reporte.UsuarioTecnico = request.UsuarioTecnico ??"";
