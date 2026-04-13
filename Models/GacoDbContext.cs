@@ -17,6 +17,8 @@ public partial class GacoDbContext : DbContext
         _configuration = configuration;
     }
 
+    public virtual DbSet<Calendario> Calendario { get; set; }
+
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
 
     public virtual DbSet<CatEstatus> CatEstatuses { get; set; }
@@ -55,11 +57,36 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Calendario>(entity =>
+        {
+            entity.HasKey(e => e.IdCalendario).HasName("PK__Calendario__3214EC07B0B82626");
+
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaTarea).HasColumnType("datetime");
+            entity.Property(e => e.FechaTerminado).HasColumnType("datetime");
+            entity.Property(e => e.IdCalendario).ValueGeneratedOnAdd();
+            entity.Property(e => e.Terminado).HasDefaultValue(false);
+
+            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany()
+                .HasForeignKey(d => d.IdUsuarioCreacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Calendario_Usuarios1");
+
+            entity.HasOne(d => d.IdUsuarioTareaNavigation).WithMany()
+                .HasForeignKey(d => d.IdUsuarioTarea)
+                .HasConstraintName("FK_Calendario_Usuarios");
+        });
+
         modelBuilder.Entity<CatEntidadesFederativa>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__CatEntid__3214EC07B0B82626");
@@ -271,7 +298,7 @@ public partial class GacoDbContext : DbContext
 
         modelBuilder.Entity<DetGasto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DetGasto__3214EC07174DE0D8");
+            entity.HasKey(e => e.Id).HasName("PK__DetGasto__3214EC07E7B90FDB");
 
             entity.Property(e => e.Descripcion).HasMaxLength(250);
             entity.Property(e => e.Fecha).HasColumnType("datetime");
@@ -335,7 +362,7 @@ public partial class GacoDbContext : DbContext
 
         modelBuilder.Entity<Gasto>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC076BA89E1E");
+            entity.HasKey(e => e.Id).HasName("PK__Gastos__3214EC07B01475A4");
 
             entity.Property(e => e.Concepto).HasMaxLength(250);
             entity.Property(e => e.FechaCreacion)
@@ -492,23 +519,15 @@ public partial class GacoDbContext : DbContext
 
             entity.HasIndex(e => e.IdUsuarioCreacion, "IX_ReporteServicios_IdUsuarioCreacion");
 
-            entity.Property(e => e.Accesorios)
-                .HasMaxLength(500)
-                .IsUnicode(false);
-            entity.Property(e => e.Descripcion)
-                .HasMaxLength(500)
-                .IsUnicode(false);
+            entity.Property(e => e.Accesorios).IsUnicode(false);
+            entity.Property(e => e.Descripcion).IsUnicode(false);
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.FechaInicio).HasColumnType("datetime");
             entity.Property(e => e.FechaModificacion).HasColumnType("datetime");
-            entity.Property(e => e.ObservacionesRecomendaciones)
-                .HasMaxLength(500)
-                .IsUnicode(false);
-            entity.Property(e => e.Titulo)
-                .HasMaxLength(300)
-                .IsUnicode(false);
+            entity.Property(e => e.ObservacionesRecomendaciones).IsUnicode(false);
+            entity.Property(e => e.Titulo).IsUnicode(false);
             entity.Property(e => e.UsuarioEncargado)
                 .HasMaxLength(300)
                 .IsUnicode(false);
