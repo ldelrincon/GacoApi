@@ -2,6 +2,9 @@
 {
     public class BusquedaProductoRequest : BasePaginadorRequest
     {
-        public string Busqueda { get; set; }
+        public string Descripcion { get; set; }
+
+        public int IdCatGrupoProducto { get; set; }
+         
     }
 }

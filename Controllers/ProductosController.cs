@@ -32,24 +32,35 @@ namespace gaco_api.Controllers
                 .Include(u => u.IdCatEstatusNavigation)
                 .AsQueryable();
 
-            // Filtrar si hay una búsqueda
-            if (!string.IsNullOrEmpty(request.Busqueda))
+            // Filtrar solo activos
+            query = query.Where(p => p.IdCatEstatus == 1);
+
+            // Filtrar por descripción (opcional)
+            if (!string.IsNullOrWhiteSpace(request.Descripcion))
             {
-                query = query.Where(u => u.Codigo.Contains(request.Busqueda)
-                    || u.Producto1.Contains(request.Busqueda)
-                    || u.IdCatGrupoProductoNavigation.Grupo.Contains(request.Busqueda)
-                    && u.IdCatEstatus == 1
+                var termino = request.Descripcion.Trim();
+                query = query.Where(u =>
+                    u.Codigo.Contains(termino) ||
+                    (!string.IsNullOrEmpty(u.Producto1) && u.Producto1.Contains(termino)) ||
+                    (!string.IsNullOrEmpty(u.Descripcion) && u.Descripcion.Contains(termino)) ||
+                    (u.IdCatGrupoProductoNavigation != null && u.IdCatGrupoProductoNavigation.Grupo.Contains(termino))
                 );
             }
 
-            if(request.CantidadPorPagina == -1)
+            // Filtrar por grupo de producto (opcional)
+            if (request.IdCatGrupoProducto != 0)
             {
-                request.CantidadPorPagina = await _context.Productos.CountAsync(x => x.IdCatEstatus == 1);
+                query = query.Where(u => u.IdCatGrupoProducto == request.IdCatGrupoProducto);
+            }
+
+            // Si solicitan todos los registros para paginar (CantidadPorPagina == -1), contar los filtrados
+            if (request.CantidadPorPagina == -1)
+            {
+                request.CantidadPorPagina = await query.CountAsync();
             }
 
             // Seleccionar y aplicar paginación
             var productos = await query
-                .Where(p=> p.IdCatEstatus == 1)
                 .Select(x => new ProductoResponse
                 {
                     Id = x.Id,
