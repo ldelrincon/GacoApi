@@ -6,18 +6,16 @@ namespace gaco_api.Models;
 
 public partial class GacoDbContext : DbContext
 {
-    private readonly IConfiguration _configuration;
     public GacoDbContext()
     {
     }
 
-    public GacoDbContext(DbContextOptions<GacoDbContext> options, IConfiguration configuration)
+    public GacoDbContext(DbContextOptions<GacoDbContext> options)
         : base(options)
     {
-        _configuration = configuration;
     }
 
-    public virtual DbSet<Calendario> Calendario { get; set; }
+    public virtual DbSet<Calendario> Calendarios { get; set; }
 
     public virtual DbSet<CatEntidadesFederativa> CatEntidadesFederativas { get; set; }
 
@@ -57,14 +55,19 @@ public partial class GacoDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
+    public virtual DbSet<Venta> Ventas { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=69.48.202.76;Initial Catalog=gaco_db;Persist Security Info=True;User ID=sa;Password=/^FI30i_,&(Y8It5h+;Connect Timeout=200;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Calendario>(entity =>
         {
-            entity.HasKey(e => e.IdCalendario).HasName("PK__Calendario__3214EC07B0B82626");
+            entity.HasKey(e => e.IdCalendario);
+
+            entity.ToTable("Calendario");
 
             entity.Property(e => e.Descripcion)
                 .HasMaxLength(500)
@@ -74,15 +77,14 @@ public partial class GacoDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.FechaTarea).HasColumnType("datetime");
             entity.Property(e => e.FechaTerminado).HasColumnType("datetime");
-            entity.Property(e => e.IdCalendario).ValueGeneratedOnAdd();
             entity.Property(e => e.Terminado).HasDefaultValue(false);
 
-            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany()
+            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany(p => p.CalendarioIdUsuarioCreacionNavigations)
                 .HasForeignKey(d => d.IdUsuarioCreacion)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Calendario_Usuarios1");
 
-            entity.HasOne(d => d.IdUsuarioTareaNavigation).WithMany()
+            entity.HasOne(d => d.IdUsuarioTareaNavigation).WithMany(p => p.CalendarioIdUsuarioTareaNavigations)
                 .HasForeignKey(d => d.IdUsuarioTarea)
                 .HasConstraintName("FK_Calendario_Usuarios");
         });
@@ -633,6 +635,38 @@ public partial class GacoDbContext : DbContext
                 .HasForeignKey(d => d.IdCatTipoUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Usuarios_CatTipoUsuarios_Id");
+        });
+
+        modelBuilder.Entity<Venta>(entity =>
+        {
+            entity.HasKey(e => e.IdVentas);
+
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(8000)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaVenta).HasColumnType("datetime");
+            entity.Property(e => e.Iva).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Observaciones)
+                .HasMaxLength(8000)
+                .IsUnicode(false);
+            entity.Property(e => e.Precio).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Subtotal).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.EstatusNavigation).WithMany(p => p.Venta)
+                .HasForeignKey(d => d.Estatus)
+                .HasConstraintName("FK_Ventas_CatEstatuses");
+
+            entity.HasOne(d => d.IdClienteNavigation).WithMany(p => p.Venta)
+                .HasForeignKey(d => d.IdCliente)
+                .HasConstraintName("FK_Ventas_Ventas");
+
+            entity.HasOne(d => d.IdUsuarioCreacionNavigation).WithMany(p => p.Venta)
+                .HasForeignKey(d => d.IdUsuarioCreacion)
+                .HasConstraintName("FK_Ventas_Ventas1");
         });
 
         OnModelCreatingPartial(modelBuilder);

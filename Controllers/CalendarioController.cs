@@ -66,7 +66,7 @@ namespace gaco_api.Controllers
                     FechaTarea = request.FechaTarea,
                   
                 };
-                await _context.Calendario.AddAsync(nuevo);
+                await _context.Calendarios.AddAsync(nuevo);
                 await _context.SaveChangesAsync();
 
                 // await _context.SaveChangesAsync();
@@ -94,7 +94,7 @@ namespace gaco_api.Controllers
 
             try
             {
-                var tareas = await _context.Calendario
+                var tareas = await _context.Calendarios
                     .Include(c => c.IdUsuarioTareaNavigation)
                     .Where(c => c.Terminado == false || c.Terminado == null)
                     .OrderBy(c => c.FechaTarea)
@@ -144,7 +144,7 @@ namespace gaco_api.Controllers
                     return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
                 }
 
-                var calendario = await _context.Calendario
+                var calendario = await _context.Calendarios
                     .FirstOrDefaultAsync(c => c.IdCalendario == request.IdCalendario);
 
                 if (calendario == null)
@@ -157,7 +157,7 @@ namespace gaco_api.Controllers
                 calendario.Terminado = true; // equivalente a 1
                 calendario.FechaTerminado = DateTime.Now;
 
-                _context.Calendario.Update(calendario);
+                _context.Calendarios.Update(calendario);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 

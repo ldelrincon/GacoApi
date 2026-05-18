@@ -40,4 +40,6 @@ public partial class Cliente
     public virtual CatRegimenFiscale IdRegimenFiscalNavigation { get; set; } = null!;
 
     public virtual ICollection<ReporteServicio> ReporteServicios { get; set; } = new List<ReporteServicio>();
+
+    public virtual ICollection<Venta> Venta { get; set; } = new List<Venta>();
 }

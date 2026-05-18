@@ -27,6 +27,10 @@ public partial class Usuario
 
     public int IdCatEstatus { get; set; }
 
+    public virtual ICollection<Calendario> CalendarioIdUsuarioCreacionNavigations { get; set; } = new List<Calendario>();
+
+    public virtual ICollection<Calendario> CalendarioIdUsuarioTareaNavigations { get; set; } = new List<Calendario>();
+
     public virtual ICollection<Gasto> Gastos { get; set; } = new List<Gasto>();
 
     public virtual CatEstatus IdCatEstatusNavigation { get; set; } = null!;
@@ -40,4 +44,6 @@ public partial class Usuario
     public virtual ICollection<ReporteServicio> ReporteServicios { get; set; } = new List<ReporteServicio>();
 
     public virtual ICollection<Seguimento> Seguimentos { get; set; } = new List<Seguimento>();
+
+    public virtual ICollection<Venta> Venta { get; set; } = new List<Venta>();
 }
