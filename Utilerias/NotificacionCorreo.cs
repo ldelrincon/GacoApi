@@ -122,7 +122,8 @@ namespace gaco_api.Utilerias
             // Guardar el PDF en un archivo
         
             string filePath = PathPlantilla;
-            byte[] pdf = converter.Convert(doc);
+            //byte[] pdf = converter.Convert(doc);
+            byte[] pdf = new byte[0];
             //File.WriteAllBytes(filePath, pdf);
 
             // Crear el mensaje de correo con MimeKit
@@ -155,23 +156,24 @@ namespace gaco_api.Utilerias
 
             //funcion para adjuntar archivos pdf de evidencias
 
-            //foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x=>x.Extension.Contains("pdf")).ToList())
-            //{
-            //    var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
-            //    if (File.Exists(Ruta))
-            //    {
-            //        if (!string.IsNullOrEmpty(Ruta))
-            //        {
-            //            var Base64pdf = _utilidades.GetFileBytes(Ruta);
-            //            bodyBuilder.Attachments.Add(fileName: objEvidencias.Nombre,
-            //                    data: Base64pdf,
-            //                    contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
-            //        }
-            //    }
-            //}
-            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-                           data: pdf,
-                           contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+            foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x => x.Extension.Contains("pdf")).ToList())
+            {
+                var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
+                if (File.Exists(Ruta))
+                {
+                    if (!string.IsNullOrEmpty(Ruta))
+                    {
+                        var Base64pdf = _utilidades.GetFileBytes(Ruta);
+                        bodyBuilder.Attachments.Add(fileName: objEvidencias.Nombre,
+                                data: Base64pdf,
+                                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+                    }
+                }
+            }
+            //comentado para pruebas generacion pdf
+            //bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
+            //               data: pdf,
+            //               contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
 
             // Asignar el cuerpo del correo
             message.Body = bodyBuilder.ToMessageBody();
