@@ -122,8 +122,8 @@ namespace gaco_api.Utilerias
             // Guardar el PDF en un archivo
         
             string filePath = PathPlantilla;
-            //byte[] pdf = converter.Convert(doc);
-            byte[] pdf = new byte[0];
+            byte[] pdf = converter.Convert(doc);
+            //byte[] pdf = new byte[0];
             //File.WriteAllBytes(filePath, pdf);
 
             // Crear el mensaje de correo con MimeKit
@@ -171,9 +171,9 @@ namespace gaco_api.Utilerias
                 }
             }
             //comentado para pruebas generacion pdf
-            //bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-            //               data: pdf,
-            //               contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
+                           data: pdf,
+                           contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
 
             // Asignar el cuerpo del correo
             message.Body = bodyBuilder.ToMessageBody();
