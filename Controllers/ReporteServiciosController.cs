@@ -1676,5 +1676,48 @@ namespace gaco_api.Controllers
             return Ok(response);
         }
 
+        [HttpPost]
+        [Route("CancelarServicio/{id}")]
+        public async Task<IActionResult> CancelarServicio(long id)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Validar usuario logueado
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!long.TryParse(nameIdentifier, out long userId))
+                {
+                    return Conflict(new DefaultResponse<object> { Message = "No se tiene permisos para esta acción." });
+                }
+
+                // Buscar reporte por Id
+                var reporte = await _context.ReporteServicios.FirstOrDefaultAsync(r => r.Id == id);
+                if (reporte == null)
+                {
+                    return NotFound(new DefaultResponse<object> { Message = "No se encontró el reporte." });
+                }
+
+                // Actualizar estatus a 2
+                reporte.IdCatEstatus = 2;
+                reporte.FechaModificacion = DateTime.UtcNow;
+
+                _context.ReporteServicios.Update(reporte);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new DefaultResponse<object>
+                {
+                    Success = true,
+                    Message = "Reporte cancelado correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new DefaultResponse<object> { Message = ex.Message });
+            }
+        }
+
     }
 }
