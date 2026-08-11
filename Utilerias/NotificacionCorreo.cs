@@ -100,185 +100,152 @@ namespace gaco_api.Utilerias
 
         public void Send(ClsModCorreo Correo, string ContentRootPath, ReporteServicioResponse objReporteServicioResponse)
         {
-           
-            // Crear un documento HTML que luego convertiremos a PDF
-            
-            var PathPlantilla = Path.Combine(ContentRootPath, "Files", "solicitudInvestigacion.html");
-            var srcImage = Path.Combine(ContentRootPath, "Image", "Gaco.jpeg");
-            ClsNegGenerarPDF objNegGenerarPDF = new ClsNegGenerarPDF();
-            string strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionpdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
-            //var htmlContent = "<h1>Este es un correo con un archivo adjunto</h1><p>Este archivo es un PDF generado a partir de HTML.</p>";
-            var htmlContent = strTexto;
+            SendAsync(Correo, ContentRootPath, objReporteServicioResponse).GetAwaiter().GetResult();
+        }
 
-            // Convertir HTML a PDF usando DinkToPdf
-            var converter = new BasicConverter(new PdfTools());
-            var doc = new HtmlToPdfDocument()
+        public async Task SendAsync(ClsModCorreo Correo, string ContentRootPath, ReporteServicioResponse objReporteServicioResponse)
+        {
+            try
             {
-                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait },
-                Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
-            };
-        
+                var PathPlantilla = Path.Combine(ContentRootPath, "Files", "solicitudInvestigacion.html");
+                var srcImage = Path.Combine(ContentRootPath, "Image", "Gaco.jpeg");
+                var objNegGenerarPDF = new ClsNegGenerarPDF();
+                var strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionpdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
+                var htmlContent = strTexto;
 
-            // Guardar el PDF en un archivo
-        
-            string filePath = PathPlantilla;
-            byte[] pdf = converter.Convert(doc);
-            //byte[] pdf = new byte[0];
-            //File.WriteAllBytes(filePath, pdf);
-
-            // Crear el mensaje de correo con MimeKit
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
-            message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
-            message.Subject = "Seguimiento para facturación de cliente: "+ objReporteServicioResponse.Cliente+ "";
-
-            //  Agregar copia (CC)
-            if (!string.IsNullOrEmpty(Correo.strCC))
-            {
-                // Puedes agregar varios correos separados por coma
-                foreach (var cc in Correo.strCC.Split(',', ';'))
+                var converter = new BasicConverter(new PdfTools());
+                var doc = new HtmlToPdfDocument()
                 {
-                    var ccTrimmed = cc.Trim();
-                    if (!string.IsNullOrEmpty(ccTrimmed))
-                        message.Cc.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", ccTrimmed));
+                    GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait },
+                    Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
+                };
+
+                var pdf = await Task.Run(() => converter.Convert(doc));
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
+                message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
+                message.Subject = "Seguimiento para facturación de cliente: " + objReporteServicioResponse.Cliente + "";
+
+                if (!string.IsNullOrEmpty(Correo.strCC))
+                {
+                    foreach (var cc in Correo.strCC.Split(',', ';'))
+                    {
+                        var ccTrimmed = cc.Trim();
+                        if (!string.IsNullOrEmpty(ccTrimmed))
+                            message.Cc.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", ccTrimmed));
+                    }
                 }
-            }
-            // Crear el cuerpo del mensaje en formato HTML
-            //var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
-            var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };
 
-            // Adjuntar el archivo PDF
-            //bodyBuilder.Attachments.Add(filePath);
-            //bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-            //                data: pdf,
-            //                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+                var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };
 
-
-            //funcion para adjuntar archivos pdf de evidencias
-
-            foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x => x.Extension.Contains("pdf")).ToList())
-            {
-                var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
-                if (File.Exists(Ruta))
+                foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x => x.Extension.Contains("pdf")).ToList())
                 {
-                    if (!string.IsNullOrEmpty(Ruta))
+                    var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
+                    if (File.Exists(Ruta) && !string.IsNullOrEmpty(Ruta))
                     {
                         var Base64pdf = _utilidades.GetFileBytes(Ruta);
                         bodyBuilder.Attachments.Add(fileName: objEvidencias.Nombre,
-                                data: Base64pdf,
-                                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+                            data: Base64pdf,
+                            contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
                     }
                 }
+
+                bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
+                    data: pdf,
+                    contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var clientimp = new MailKit.Net.Smtp.SmtpClient())
+                {
+                    clientimp.Timeout = 200000;
+                    await clientimp.ConnectAsync(Correo.strHost, (int)Correo.intPuerto, SecureSocketOptions.StartTls);
+                    await clientimp.AuthenticateAsync(Correo.strFrom, Correo.strPassword);
+                    await clientimp.SendAsync(message);
+                    await clientimp.DisconnectAsync(true);
+                }
             }
-            //comentado para pruebas generacion pdf
-            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-                           data: pdf,
-                           contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
-
-            // Asignar el cuerpo del correo
-            message.Body = bodyBuilder.ToMessageBody();
-
-            // Enviar el correo utilizando MailKit (SMTP)
-            using (var clientimp = new MailKit.Net.Smtp.SmtpClient())
+            catch (Exception ex)
             {
-                clientimp.Timeout = 200000;
-
-                clientimp.Connect(Correo.strHost, (int)Correo.intPuerto, SecureSocketOptions.StartTls);
-                clientimp.Authenticate(Correo.strFrom, Correo.strPassword);
-                clientimp.Send(message);
-                clientimp.Disconnect(true);
+                Console.WriteLine(ex);
+                throw;
             }
-            // Eliminar el archivo PDF después de enviarlo (opcional)
-            //File.Delete(filePath);
         }
 
         public void SendProyecto(ClsModCorreo Correo, string ContentRootPath, ReporteServicioResponse objReporteServicioResponse)
         {
+            SendProyectoAsync(Correo, ContentRootPath, objReporteServicioResponse).GetAwaiter().GetResult();
+        }
 
-            // Crear un documento HTML que luego convertiremos a PDF
-
-            var PathPlantilla = Path.Combine(ContentRootPath, "Files", "solicitudInvestigacionProyecto.html");
-            var srcImage = Path.Combine(ContentRootPath, "Image", "Gaco.jpeg");
-            ClsNegGenerarPDF objNegGenerarPDF = new ClsNegGenerarPDF();
-            string strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionProyectopdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
-            //var htmlContent = "<h1>Este es un correo con un archivo adjunto</h1><p>Este archivo es un PDF generado a partir de HTML.</p>";
-            var htmlContent = strTexto;
-
-            // Convertir HTML a PDF usando DinkToPdf
-            var converter = new BasicConverter(new PdfTools());
-            var doc = new HtmlToPdfDocument()
+        public async Task SendProyectoAsync(ClsModCorreo Correo, string ContentRootPath, ReporteServicioResponse objReporteServicioResponse)
+        {
+            try
             {
-                GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait },
-                Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
-            };
+                var PathPlantilla = Path.Combine(ContentRootPath, "Files", "solicitudInvestigacionProyecto.html");
+                var srcImage = Path.Combine(ContentRootPath, "Image", "Gaco.jpeg");
+                var objNegGenerarPDF = new ClsNegGenerarPDF();
+                var strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionProyectopdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
+                var htmlContent = strTexto;
 
-
-            // Guardar el PDF en un archivo
-
-            string filePath = PathPlantilla;
-            byte[] pdf = converter.Convert(doc);
-            //File.WriteAllBytes(filePath, pdf);
-
-            // Crear el mensaje de correo con MimeKit
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
-            message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
-            message.Subject = "Seguimiento para facturación de cliente: " + objReporteServicioResponse.Cliente + "";
-
-            //  Agregar copia (CC)
-            if (!string.IsNullOrEmpty(Correo.strCC))
-            {
-                // Puedes agregar varios correos separados por coma
-                foreach (var cc in Correo.strCC.Split(',', ';'))
+                var converter = new BasicConverter(new PdfTools());
+                var doc = new HtmlToPdfDocument()
                 {
-                    var ccTrimmed = cc.Trim();
-                    if (!string.IsNullOrEmpty(ccTrimmed))
-                        message.Cc.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", ccTrimmed));
+                    GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait },
+                    Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
+                };
+
+                var pdf = await Task.Run(() => converter.Convert(doc));
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
+                message.To.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strTo));
+                message.Subject = "Seguimiento para facturación de cliente: " + objReporteServicioResponse.Cliente + "";
+
+                if (!string.IsNullOrEmpty(Correo.strCC))
+                {
+                    foreach (var cc in Correo.strCC.Split(',', ';'))
+                    {
+                        var ccTrimmed = cc.Trim();
+                        if (!string.IsNullOrEmpty(ccTrimmed))
+                            message.Cc.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", ccTrimmed));
+                    }
                 }
-            }
-            // Crear el cuerpo del mensaje en formato HTML
-            //var bodyBuilder = new BodyBuilder { HtmlBody = htmlContent };
-            var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };
 
-            // Adjuntar el archivo PDF
-            //bodyBuilder.Attachments.Add(filePath);
-            //bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-            //                data: pdf,
-            //                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+                var bodyBuilder = new BodyBuilder { TextBody = Correo.strBody };
 
-            foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x => x.Extension.Contains("pdf")).ToList())
-            {
-                var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
-                if (File.Exists(Ruta))
+                foreach (var objEvidencias in objReporteServicioResponse.Evidencias.Where(x => x.Extension.Contains("pdf")).ToList())
                 {
-                    if (!string.IsNullOrEmpty(Ruta))
+                    var Ruta = _utilidades.GetPhysicalPath(objEvidencias.Ruta);
+                    if (File.Exists(Ruta) && !string.IsNullOrEmpty(Ruta))
                     {
                         var Base64pdf = _utilidades.GetFileBytes(Ruta);
                         bodyBuilder.Attachments.Add(fileName: objEvidencias.Nombre,
-                                data: Base64pdf,
-                                contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+                            data: Base64pdf,
+                            contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
                     }
                 }
+
+                bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
+                    data: pdf,
+                    contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using (var clientimp = new MailKit.Net.Smtp.SmtpClient())
+                {
+                    clientimp.Timeout = 200000;
+                    await clientimp.ConnectAsync(Correo.strHost, (int)Correo.intPuerto, SecureSocketOptions.StartTls);
+                    await clientimp.AuthenticateAsync(Correo.strFrom, Correo.strPassword);
+                    await clientimp.SendAsync(message);
+                    await clientimp.DisconnectAsync(true);
+                }
             }
-            bodyBuilder.Attachments.Add(fileName: "Seguimiento.pdf",
-                           data: pdf,
-                           contentType: MimeKit.ContentType.Parse(MediaTypeNames.Application.Pdf));
-
-            // Asignar el cuerpo del correo
-            message.Body = bodyBuilder.ToMessageBody();
-
-            // Enviar el correo utilizando MailKit (SMTP)
-            using (var clientimp = new MailKit.Net.Smtp.SmtpClient())
+            catch (Exception ex)
             {
-                clientimp.Timeout = 200000;
-
-                clientimp.Connect(Correo.strHost, (int)Correo.intPuerto, SecureSocketOptions.StartTls);
-                clientimp.Authenticate(Correo.strFrom, Correo.strPassword);
-                clientimp.Send(message);
-                clientimp.Disconnect(true);
+                Console.WriteLine(ex);
+                throw;
             }
-            // Eliminar el archivo PDF después de enviarlo (opcional)
-            //File.Delete(filePath);
         }
 
 

@@ -406,11 +406,31 @@ namespace gaco_api.Controllers
                 TargetCorreo.usaSSL = false;
                 if (reporteServicios.IdCatSolicitud != 2)
                 {
-                    _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _NotificacionCorreo.SendAsync(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+                    });
                 }
                 else
                 {
-                    _NotificacionCorreo.SendProyecto(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _NotificacionCorreo.SendProyectoAsync(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -1582,11 +1602,31 @@ namespace gaco_api.Controllers
                             TargetCorreo.usaSSL = false;
                             if (reporteServicios.IdCatSolicitud != 2)
                             {
-                                _NotificacionCorreo.Send(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                                _ = Task.Run(async () =>
+                                {
+                                    try
+                                    {
+                                        await _NotificacionCorreo.SendAsync(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex);
+                                    }
+                                });
                             }
                             else
                             {
-                                _NotificacionCorreo.SendProyecto(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                                _ = Task.Run(async () =>
+                                {
+                                    try
+                                    {
+                                        await _NotificacionCorreo.SendProyectoAsync(TargetCorreo, _env.ContentRootPath, reporteServicios);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex);
+                                    }
+                                });
                             }
                         }
                         catch (Exception ex)
