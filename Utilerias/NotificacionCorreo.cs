@@ -1,25 +1,27 @@
-﻿using System.Net.Mail;
-//using MimeKit;
-using System.Threading.Tasks;
+﻿using ClbNegGestores;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using gaco_api.Customs;
+using gaco_api.Models;
+using gaco_api.Models.DTOs.Requests.Evidencias;
+using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
+using HtmlAgilityPack;
+using MailKit.Security;
+using Microsoft.AspNetCore.Html;
+using Microsoft.CodeAnalysis.RulesetToEditorconfig;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MimeKit;
+using Org.BouncyCastle.Utilities;
+using System.Configuration;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
-using MimeKit;
-using MailKit.Security;
-using System.Configuration;
-using gaco_api.Models;
-using ClbNegGestores;
-using static gaco_api.Models.ClsModCorreo;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using Org.BouncyCastle.Utilities;
-using Microsoft.AspNetCore.Html;
-using System.Web;
-using System.IO;
+using System.Net.Mail;
 using System.Net.Mime;
-using DinkToPdf;
-using HtmlAgilityPack;
-using gaco_api.Models.DTOs.Responses.ReporteSolicitudes;
-using gaco_api.Models.DTOs.Requests.Evidencias;
-using gaco_api.Customs;
+//using MimeKit;
+using System.Threading.Tasks;
+using System.Web;
+using static gaco_api.Models.ClsModCorreo;
 
 
 namespace gaco_api.Utilerias
@@ -27,10 +29,12 @@ namespace gaco_api.Utilerias
     public class NotificacionCorreo
     {
         private readonly Utilidades _utilidades;
+        private readonly IConverter _converter;
 
-        public NotificacionCorreo(Utilidades Utilidades)
+        public NotificacionCorreo(Utilidades Utilidades, IConverter converter)
         {
             _utilidades = Utilidades;
+            _converter = converter;
         }
         public static void Send2(ClsModCorreo Correo, string ContentRootPath)
         {
@@ -113,14 +117,13 @@ namespace gaco_api.Utilerias
                 var strTexto = objNegGenerarPDF.ExportPDFPlantillaSolicitudInvestigacionpdf("Pruebas luis", PathPlantilla, srcImage, objReporteServicioResponse);
                 var htmlContent = strTexto;
 
-                var converter = new BasicConverter(new PdfTools());
                 var doc = new HtmlToPdfDocument()
                 {
                     GlobalSettings = { ColorMode = ColorMode.Color, Orientation = Orientation.Portrait },
                     Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
                 };
 
-                var pdf = await Task.Run(() => converter.Convert(doc));
+                var pdf = _converter.Convert(doc);
 
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
@@ -195,7 +198,7 @@ namespace gaco_api.Utilerias
                     Objects = { new ObjectSettings { HtmlContent = htmlContent, WebSettings = { DefaultEncoding = "utf-8" } } }
                 };
 
-                var pdf = await Task.Run(() => converter.Convert(doc));
+                var pdf = _converter.Convert(doc);
 
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress(System.Text.Encoding.UTF8, "", Correo.strFrom));
