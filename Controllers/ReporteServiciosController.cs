@@ -246,8 +246,8 @@ namespace gaco_api.Controllers
                     {
                         foreach (var item in item2.RelSeguimentoProductos)
                         {
-                            objReporteServicioResponse.Total += item.MontoVenta;
-                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                            objReporteServicioResponse.Total += item.MontoVenta ?? 0;    
+                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto ?? 0);
                         }
                     }
 
@@ -1423,10 +1423,10 @@ namespace gaco_api.Controllers
                         {
                             if (item.MontoGasto == null)
                             {
-                                item.MontoGasto = item.MontoVenta;
+                                item.MontoGasto = item.MontoVenta ?? 0;
                             }
-                            objReporteServicioResponse.Total += item.MontoVenta;
-                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                            objReporteServicioResponse.Total += item.MontoVenta ?? 0;
+                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto ?? 0);
                         }
                     }
 
