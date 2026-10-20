@@ -123,8 +123,8 @@ namespace gaco_api.Controllers
                     {
                         foreach (var item in item2.RelSeguimentoProductos)
                         {
-                            objReporteServicioResponse.Total +=  item.MontoVenta;
-                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto);
+                            objReporteServicioResponse.Total +=  item.MontoVenta ?? 0;
+                            objReporteServicioResponse.TotalGasto += (item.Cantidad * item.MontoGasto ?? 0);
                         }
                     }
                   
